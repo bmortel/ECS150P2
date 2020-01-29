@@ -6,18 +6,20 @@
 #include "LinkedList.h"
 
 struct queue {
-    struct LinkedList* head;
+    struct LinkedList* items;
+    struct ListNode* head;
     int length;
-    struct LinkedList* curr;
+    struct ListNode* curr;
 };
 
 queue_t queue_create(void)
-{
-	queue_t myQueue;
+{   
+
+	queue_t myQueue = (struct queue *) malloc(sizeof(struct queue));
     myQueue->head = (struct ListNode *) malloc(sizeof(struct ListNode));
     myQueue->head->next = NULL;
     myQueue->head->item = NULL;
-    myQueue->curr = head;
+    myQueue->curr = myQueue->head;
 	myQueue->length = 0;
 }
 
@@ -61,7 +63,7 @@ int queue_delete(queue_t queue, void *data)
 {
     struct ListNode* curr = queue->head;
     struct ListNode* prev = NULL;
-	if ((*data) == NULL || queue->head == NULL) {
+	if ((data) == NULL || queue->head == NULL) {
 	     return -1;
 	}
 
@@ -86,11 +88,30 @@ int queue_delete(queue_t queue, void *data)
 
 int queue_iterate(queue_t queue, queue_func_t func, void *arg, void **data)
 {
-	/* TODO Phase 1 */
+    if (queue == NULL || func == NULL){
+        return -1;
+    }
+
+    struct ListNode* curr = queue->head;
+
+    while(curr != NULL){
+        if(func(curr->item, arg)){
+            if (data != NULL){
+            *data = curr->item;
+            }
+            break;
+        }
+        curr = curr->next;
+    }
+
+    return 0;
 }
 
 int queue_length(queue_t queue)
 {
-	/* TODO Phase 1 */
+    if (queue == NULL)
+        return -1;
+	return queue->length;
+    
 }
 
