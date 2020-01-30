@@ -27,10 +27,14 @@ queue_t queue_create(void)
 	return myQueue;
 }
 
-/*int queue_destroy(queue_t queue)
+int queue_destroy(queue_t queue)
 {
-	*//* TODO Phase 1 *//*
-}*/
+	if (queue->length != 0 || queue == NULL){
+        return -1;
+    }
+    free(queue);
+    return 0;
+}
 
 int queue_enqueue(queue_t queue, void *data)
 {
