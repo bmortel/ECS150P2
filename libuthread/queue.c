@@ -123,6 +123,7 @@ int queue_length(queue_t queue)
     
 }
 
+/*
 int main() {
     queue_t q;
     int data = 3, *ptr;
@@ -134,4 +135,4 @@ int main() {
 
     return 0;
 };
-
+*/
