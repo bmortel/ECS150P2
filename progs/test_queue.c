@@ -71,11 +71,30 @@ void test_iterator(void)
     assert(ptr == &data[3]);
 }
 
+void test_delete(void){
+    queue_t q;
+    q = queue_create();
+    int array[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+    int i;
+    int data = 5;
+
+    for (i = 0; i < sizeof(array) / sizeof(array[0]); i++)
+        queue_enqueue(q, &array[i]);
+
+    queue_enqueue(q, &data);
+    assert(queue_length(q) == 11);
+    queue_delete(q, &data);
+    assert(queue_length(q) == 10);
+
+}
+
+
 
 int main(){
 
     test_create();
     test_queue_simple();
     test_iterator();
+    test_delete();
 
 }

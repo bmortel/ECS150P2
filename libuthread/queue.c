@@ -71,13 +71,13 @@ int queue_dequeue(queue_t queue, void **data)
 
 int queue_delete(queue_t queue, void *data)
 {
-    struct ListNode* curr = queue->head;
+    struct ListNode* curr = queue->head->next;
     struct ListNode* prev = NULL;
 	if ((data) == NULL || queue->head == NULL) {
 	     return -1;
 	}
 
-	while(curr->next != NULL) {
+	while(curr != NULL) {
 	    if ((data) == ((curr->item))) {
             if (prev == NULL) {
                 queue_dequeue(queue, NULL);
