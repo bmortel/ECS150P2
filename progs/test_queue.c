@@ -1,9 +1,14 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 #include <assert.h>
+#include <malloc/malloc.h>
 #include "queue.h"
 #include "LinkedList.h"
+
+
+
 
 void test_create(void)
 {
@@ -89,6 +94,33 @@ void test_delete(void){
 }
 
 
+void test_destroy(){
+
+    //mallopt()
+
+    queue_t q;
+    q = queue_create();
+
+
+
+    int j = 42;
+
+    queue_enqueue(q, &j);
+
+    assert(queue_length(q) == 1);
+    assert(queue_destroy(q) == -1);
+
+    queue_delete(q, &j);
+    assert(queue_length(q) == 0);
+
+    queue_destroy(q);
+
+// free should throw error if queue_destroy succeeds 
+    //free(q);
+
+}
+
+
 
 int main(){
 
@@ -96,5 +128,5 @@ int main(){
     test_queue_simple();
     test_iterator();
     test_delete();
-
+    test_destroy();
 }

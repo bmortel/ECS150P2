@@ -80,7 +80,9 @@ int queue_delete(queue_t queue, void *data)
 	while(curr != NULL) {
 	    if ((data) == ((curr->item))) {
             if (prev == NULL) {
-                queue_dequeue(queue, NULL);
+                queue->head->next = curr->next;
+                free(curr);
+                queue->length--;
             }
             else {
                 prev->next = curr->next;
