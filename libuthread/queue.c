@@ -44,24 +44,26 @@ int queue_enqueue(queue_t queue, void *data)
     if (nextN == NULL || data == NULL) {
         return -1;
     }
+
 	queue->curr->next = nextN;
 	queue->curr = queue->curr->next;
 	queue->length++;
+    
 	return 0;
 }
 
 int queue_dequeue(queue_t queue, void **data)
 {
-    struct ListNode* tempHead = queue->head->next;
+    struct ListNode* tempHead = queue->head->next->next;
     // If data or queue is empty, return -1
-    if ((data) == NULL || queue->head == NULL || tempHead == NULL){
+    if ((data) == NULL || queue->head->next == NULL || queue == NULL){
         return -1;
     }
 
     // Assign the oldest item in the queue to the data pointer
-    (*data) = queue->head->item;
-    free(queue->head);
-    queue->head = tempHead;
+    (*data) = queue->head->next->item;
+    free(queue->head->next);
+    queue->head->next = tempHead;
 	queue->length--;
 
 	return 0;
@@ -100,7 +102,7 @@ int queue_iterate(queue_t queue, queue_func_t func, void *arg, void **data)
         return -1;
     }
 
-    struct ListNode* curr = queue->head;
+    struct ListNode* curr = queue->head->next;
 
     while(curr != NULL){
         if(func(curr->item, arg)){
