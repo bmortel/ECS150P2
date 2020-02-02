@@ -34,7 +34,7 @@ int queue_destroy(queue_t queue)
     }
     free(queue->head);
     free(queue);
-    queue = NULL;
+    
     return 0;
 }
 
@@ -84,6 +84,7 @@ int queue_delete(queue_t queue, void *data)
 
 	while(curr != NULL) {
 	    if ((data) == ((curr->item))) {
+            // If @data found in first ListNode
             if (prev == NULL) {
                 queue->head->next = curr->next;
                 free(curr);
@@ -111,7 +112,10 @@ int queue_iterate(queue_t queue, queue_func_t func, void *arg, void **data)
 
     struct ListNode* curr = queue->head->next;
 
+    // while not at the end of the list
     while(curr != NULL){
+        // If @func returns 1 for current item and @data
+        // is not NULL set data to item and stop iteration
         if(func(curr->item, arg)){
             if (data != NULL){
             *data = curr->item;
