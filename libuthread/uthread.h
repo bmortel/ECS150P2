@@ -81,4 +81,14 @@ void uthread_exit(int retval);
  */
 int uthread_join(uthread_t tid, int *retval);
 
+/*
+ * uthread_init - Initialize the uthread library
+ * @func: function pointer of the main function to be executed
+ * @arg: Argument to be passed to the thread
+ *
+ * This function initializes the uthread library by initializing a thread
+ * control block queue and enqueuing the main thread with tid 0.
+ */
+void uthread_init(uthread_func_t func, void *arg);
+
 #endif /* _THREAD_H */
