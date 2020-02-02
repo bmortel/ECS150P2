@@ -29,21 +29,24 @@ queue_t queue_create(void)
 
 int queue_destroy(queue_t queue)
 {
-	if (queue->length != 0 || queue == NULL){
+	if (queue == NULL || queue->length != 0){
         return -1;
     }
+    free(queue->head);
     free(queue);
+    queue = NULL;
     return 0;
 }
 
 int queue_enqueue(queue_t queue, void *data)
 {
+    if (queue == NULL || data == NULL) {
+        return -1;
+    }
     struct ListNode* nextN = (struct ListNode *) malloc(sizeof(struct ListNode));
     nextN->next = NULL;
     nextN->item = data;
-    if (nextN == NULL || data == NULL) {
-        return -1;
-    }
+
 
 	queue->curr->next = nextN;
 	queue->curr = queue->curr->next;
@@ -54,11 +57,12 @@ int queue_enqueue(queue_t queue, void *data)
 
 int queue_dequeue(queue_t queue, void **data)
 {
-    struct ListNode* tempHead = queue->head->next->next;
     // If data or queue is empty, return -1
-    if ((data) == NULL || queue->head->next == NULL || queue == NULL){
+    if ((data) == NULL || queue == NULL || queue->head->next == NULL ){
         return -1;
     }
+    struct ListNode* tempHead = queue->head->next->next;
+
 
     // Assign the oldest item in the queue to the data pointer
     (*data) = queue->head->next->item;
@@ -71,11 +75,12 @@ int queue_dequeue(queue_t queue, void **data)
 
 int queue_delete(queue_t queue, void *data)
 {
-    struct ListNode* curr = queue->head->next;
-    struct ListNode* prev = NULL;
-	if ((data) == NULL || queue->head == NULL) {
+    if (queue == NULL || (data) == NULL || queue->head == NULL) {
 	     return -1;
 	}
+    struct ListNode* curr = queue->head->next;
+    struct ListNode* prev = NULL;
+
 
 	while(curr != NULL) {
 	    if ((data) == ((curr->item))) {
