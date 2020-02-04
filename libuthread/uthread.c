@@ -25,14 +25,13 @@ bool init = false;
 void uthread_yield(void)
 {
     void* tcb = NULL;
-    void* savedTcb = currTcb;
     uthread_ctx_t* prev = currTcb->ctx;
 
+	queue_enqueue(readyQueue,currTcb);
 	if (queue_dequeue(readyQueue,tcb) != -1) {
         uthread_ctx_switch(prev, ((struct Tcb *) tcb)->ctx);
         currTcb = (struct Tcb *) tcb;
     }
-    uthread_ctx_switch(prev, savedTcb);
 }
 
 uthread_t uthread_self(void)
@@ -71,11 +70,16 @@ void uthread_exit(int retval)
 int uthread_join(uthread_t tid, int *retval)
 {
     while(1) {
-        if (queue_length(readyQueue) <= 1) {
+        if (queue_length(readyQueue) == 0) {
             return 1;
         }
         else{
-            uthread_yield();
+            void* tcb = NULL;
+            uthread_ctx_t* prev = currTcb->ctx;
+            if (queue_dequeue(readyQueue,tcb) != -1) {
+                uthread_ctx_switch(prev, ((struct Tcb *) tcb)->ctx);
+                currTcb = (struct Tcb *) tcb;
+            }
         }
     }
 
