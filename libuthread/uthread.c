@@ -81,7 +81,7 @@ int uthread_join(uthread_t tid, int *retval)
     queue_enqueue(blockedQueue, currTcb);
     currTcb->curState = blocked;
 
-    printf("F");
+    printf("F\n");
     while(1) {
         if (queue_length(readyQueue) == 0) {
             break;
@@ -90,7 +90,7 @@ int uthread_join(uthread_t tid, int *retval)
             uthread_yield();
         }
     }
-    printf("h");
+    printf("n\n");
     while (queue_length(blockedQueue) != 0) {
         if (queue_dequeue(blockedQueue,tcb) != -1) {
             uthread_ctx_switch(NULL, ((struct Tcb *) tcb)->ctx);
