@@ -69,6 +69,7 @@ void uthread_exit(int retval)
 
 int uthread_join(uthread_t tid, int *retval)
 {
+    printf("whyy");
     while(1) {
         if (queue_length(readyQueue) == 0) {
             break;
