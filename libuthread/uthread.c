@@ -22,7 +22,7 @@ int currTID = 0;
 struct Tcb* currTcb;
 bool init = false;
 
-queue_func_t check_tid(void * tcb, uthread_t tid2);
+//queue_func_t check_tid(void * tcb, uthread_t tid2);
 
 void uthread_yield(void)
 {
@@ -78,7 +78,6 @@ int uthread_join(uthread_t tid, int *retval)
     void* foundTcb = NULL;
     void* tcb = NULL;
 
-    queue_iterate(readyQueue, check_tid, tid, foundTcb);
     queue_enqueue(blockedQueue, currTcb);
     currTcb->curState = blocked;
     while(1) {
@@ -112,9 +111,11 @@ void uthread_init(uthread_func_t func, void *arg) {
     currTcb = main;
 }
 
+/*
 queue_func_t check_tid(void * tcb, uthread_t tid2) {
     if (((struct Tcb*)tcb)->tid == tid2) {
         return (queue_func_t) 1;
     }
 }
+*/
 
