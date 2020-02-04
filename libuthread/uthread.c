@@ -71,7 +71,7 @@ int uthread_join(uthread_t tid, int *retval)
 {
     while(1) {
         if (queue_length(readyQueue) == 0) {
-            return 1;
+            break;
         }
         else{
             void* tcb = NULL;
@@ -83,6 +83,7 @@ int uthread_join(uthread_t tid, int *retval)
             }
         }
     }
+    return 1;
 
 }
 void uthread_init(uthread_func_t func, void *arg) {
