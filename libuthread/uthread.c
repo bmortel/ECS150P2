@@ -69,7 +69,7 @@ void uthread_exit(int retval)
 int uthread_join(uthread_t tid, int *retval)
 {
     while(1) {
-        if (queue_length(readyQueue) == 0) {
+        if (queue_length(readyQueue) <= 1) {
             return 1;
         }
         else{
@@ -87,7 +87,6 @@ void uthread_init(uthread_func_t func, void *arg) {
     main->tid = 0;
     main->stack = uthread_ctx_alloc_stack();
     main->ctx = malloc(sizeof(uthread_ctx_t));
-    uthread_ctx_init(main->ctx, main->stack, NULL, NULL);
     currTcb = main;
 }
 
