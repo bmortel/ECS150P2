@@ -1,7 +1,7 @@
 #ifndef _CONTEXT_H
 #define _CONTEXT_H
 
-#include <sys/ucontext.h>
+#include <ucontext.h>
 
 #include "uthread.h"
 
