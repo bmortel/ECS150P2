@@ -44,19 +44,18 @@ int uthread_create(uthread_func_t func, void *arg)
         uthread_init(func, arg);
     }
     printf("hi\n");
-    struct Tcb* tb;
-    tb = malloc(sizeof(struct Tcb));
+    struct Tcb* tb = malloc(sizeof(struct Tcb));
     printf("hi\n");
     tb->ctx = malloc(sizeof(uthread_ctx_t));
     printf("hi\n");
     tb->stack = uthread_ctx_alloc_stack();
-   /* if (uthread_ctx_init(tb->ctx, tb->stack, func, arg) == -1) {
+    if (uthread_ctx_init(tb->ctx, tb->stack, func, arg) == -1) {
         return -1;
-    }*/
+    }
     TIDCount++;
     tb->tid = TIDCount;
     tb->state = "ready";
-    //queue_enqueue(readyQueue, tb);
+    queue_enqueue(readyQueue, tb);
     return TIDCount;
 }
 
