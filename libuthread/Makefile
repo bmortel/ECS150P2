@@ -16,4 +16,4 @@ libuthread.a: queue.o uthread.o context.o
 	ar rcs $(lib) queue.o uthread.o context.o
 
 clean:
-	rm -f *.o *.a *.gch
+	rm -f *.o *.a *.gch *.h.gch

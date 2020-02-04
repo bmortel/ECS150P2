@@ -7,7 +7,7 @@
 
 struct Tcb {
     uthread_t tid;
-    ucontext_t ctx;
+    ucontext_t* ctx;
     void* stack;
     char* state;
 };
