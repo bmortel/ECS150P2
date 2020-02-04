@@ -25,7 +25,7 @@ bool init = false;
 
 void uthread_yield(void)
 {
-    void* tcb = NULL;
+    void* tcb = malloc(sizeof(struct tcb));
     uthread_ctx_t* prev = currTcb->ctx;
 
     if (currTcb->curState != blocked) {
