@@ -77,6 +77,7 @@ int uthread_join(uthread_t tid, int *retval)
             void* tcb = NULL;
             uthread_ctx_t* prev = currTcb->ctx;
             if (queue_dequeue(readyQueue,tcb) != -1) {
+                printf("hi\n");
                 uthread_ctx_switch(prev, ((struct Tcb *) tcb)->ctx);
                 currTcb = (struct Tcb *) tcb;
             }
