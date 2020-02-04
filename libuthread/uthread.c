@@ -83,6 +83,7 @@ int uthread_join(uthread_t tid, int *retval)
 
     printf("F\n");
     while(1) {
+        printf("%d\n", queue_length(readyQueue));
         if (queue_length(readyQueue) == 0) {
             break;
         }
