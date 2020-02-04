@@ -25,12 +25,14 @@ bool init = false;
 void uthread_yield(void)
 {
     void* tcb = NULL;
+    void* savedTcb = currTcb;
     uthread_ctx_t* prev = currTcb->ctx;
-	queue_enqueue(readyQueue,currTcb);
+
 	if (queue_dequeue(readyQueue,tcb) != -1) {
         uthread_ctx_switch(prev, ((struct Tcb *) tcb)->ctx);
         currTcb = (struct Tcb *) tcb;
     }
+    uthread_ctx_switch(prev, savedTcb);
 }
 
 uthread_t uthread_self(void)
