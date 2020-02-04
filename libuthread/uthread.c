@@ -22,15 +22,21 @@ int currTID = 0;
 struct Tcb* currTcb;
 bool init = false;
 
+queue_func_t check_tid(void * tcb, uthread_t tid2);
+
 void uthread_yield(void)
 {
     void* tcb = NULL;
     uthread_ctx_t* prev = currTcb->ctx;
 
-	queue_enqueue(readyQueue,currTcb);
+    if (currTcb->curState != blocked) {
+        queue_enqueue(readyQueue, currTcb);
+    }
 	if (queue_dequeue(readyQueue,tcb) != -1) {
         uthread_ctx_switch(prev, ((struct Tcb *) tcb)->ctx);
         currTcb = (struct Tcb *) tcb;
+        currTcb->curState = running;
+
     }
 }
 
@@ -55,33 +61,40 @@ int uthread_create(uthread_func_t func, void *arg)
     }
     TIDCount++;
     tb->tid = TIDCount;
-    tb->state = "ready";
+    tb->curState = ready;
     queue_enqueue(readyQueue, tb);
     return TIDCount;
 }
 
 void uthread_exit(int retval)
 {
-    currTcb->state = "zombie";
+    currTcb->curState = zombie;
     queue_enqueue(zombieQueue, currTcb);
 
 }
 
 int uthread_join(uthread_t tid, int *retval)
 {
-    printf("whyy");
+    void* foundTcb = NULL;
+    void* tcb = NULL;
+
+    queue_iterate(readyQueue, check_tid, tid, foundTcb);
+    queue_enqueue(blockedQueue, currTcb);
+    currTcb->curState = blocked;
     while(1) {
         if (queue_length(readyQueue) == 0) {
             break;
         }
         else{
-            void* tcb = NULL;
-            uthread_ctx_t* prev = currTcb->ctx;
-            if (queue_dequeue(readyQueue,tcb) != -1) {
-                printf("f\n");
-                uthread_ctx_switch(prev, ((struct Tcb *) tcb)->ctx);
-                currTcb = (struct Tcb *) tcb;
-            }
+            uthread_yield();
+        }
+    }
+    while (queue_length(blockedQueue) != 0) {
+        if (queue_dequeue(blockedQueue,tcb) != -1) {
+            uthread_ctx_switch(NULL, ((struct Tcb *) tcb)->ctx);
+            currTcb = (struct Tcb *) tcb;
+            currTcb->curState = running;
+
         }
     }
     return 1;
@@ -97,5 +110,11 @@ void uthread_init(uthread_func_t func, void *arg) {
     main->stack = uthread_ctx_alloc_stack();
     main->ctx = malloc(sizeof(uthread_ctx_t));
     currTcb = main;
+}
+
+queue_func_t check_tid(void * tcb, uthread_t tid2) {
+    if (((struct Tcb*)tcb)->tid == tid2) {
+        return (queue_func_t) 1;
+    }
 }
 

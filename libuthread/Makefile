@@ -1,7 +1,7 @@
 # Target library
 lib := libuthread.a
 
-all: $(lib) clean
+all: $(lib)
 
 queue.o: queue.c queue.h
 	gcc -c queue.c queue.h
