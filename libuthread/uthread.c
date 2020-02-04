@@ -18,7 +18,6 @@ uthread_t TIDCount = 0;
 queue_t readyQueue;
 queue_t zombieQueue;
 queue_t blockedQueue;
-int currTID = 0;
 struct Tcb* currTcb;
 bool init = false;
 
@@ -28,7 +27,6 @@ void uthread_yield(void)
 {
     void* tcb = NULL;
     uthread_ctx_t* prev = currTcb->ctx;
-    printf("%d\n",currTcb->tid);
 
     if (currTcb->curState != blocked) {
         queue_enqueue(readyQueue, currTcb);
@@ -38,7 +36,7 @@ void uthread_yield(void)
         uthread_ctx_switch(prev, ((struct Tcb *) tcb)->ctx);
         currTcb = (struct Tcb *) tcb;
         currTcb->curState = running;
-
+        printf("%d\n",currTcb->tid);
     }
 }
 
