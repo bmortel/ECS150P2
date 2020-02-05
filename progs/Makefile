@@ -1,16 +1,16 @@
 # Target programs
 #  **Add more lines to this variable in order to compile more programs**
 programs := \
-	test_queue.x \
+	queue_tester.x \
 	uthread_hello.x \
 	uthread_yield.x
-
 
 ## *** IMPORTANT *** ##
 ##	You should NOT have to modify anything below
 ##
 ##  (but you are encouraged to read it and understand)
 ## ***************** ##
+
 # User-level thread library
 UTHREADLIB := libuthread
 UTHREADPATH := ../$(UTHREADLIB)
@@ -41,7 +41,6 @@ CFLAGS	+= -pipe
 ifneq ($(D),1)
 CFLAGS	+= -O2
 else
-CFLAGS	+= -O0
 CFLAGS	+= -g
 endif
 

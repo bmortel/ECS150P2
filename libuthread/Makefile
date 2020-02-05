@@ -3,7 +3,7 @@ lib     := libuthread.a
 objs    := queue.o uthread.o context.o preempt.o
 
 CC      := gcc
-CFLAGS  := -Wall -Wextra -Werror
+CFLAGS  := -Wall -Werror
 CFLAGS  += -g
 
 ifneq ($(V),1)
@@ -14,13 +14,15 @@ all: $(lib)
 
 deps := $(patsubst %.o, %.d, $(objs))
 -include $(deps)
+DEPFLAGS = -MMD -MF $(@:.o=.d)
 
-%.o: %.c %.h
-	$(CC) $(CFLAGS) -c -o $@ $<
+libuthread.a: $(objs)
+	ar rcs $@ $^
 
-libuthread.a: queue.o uthread.o context.o preempt.o
-	ar rcs $(lib) $(objs)
+%.o: %.c
+	$(Q) $(CC) $(CFLAGS) -c -o $@ $< $(DEPFLAGS)
+
 
 clean:
-    @echo "CLEAN"
-	$(Q)rm -f $(lib) $(objs) $(deps)
+	@echo "CLEAN"
+	$(Q) rm -f $(lib) $(objs) $(deps)
