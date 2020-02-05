@@ -23,22 +23,30 @@ struct itimerval timer;
 void signalHandler(int signum) { uthread_yield(); }
 
 void preempt_disable(void) {
+
   // Remove SIGVTALRM from mask
   if (sigdelset(&sigStruct.sa_mask, SIGVTALRM)) {
+
     perror("sigdelset error");
     exit(EXIT_FAILURE);
   }
 }
 
 void preempt_enable(void) {
+
   // Add SIGVTALRM back to mask
   if (sigaddset(&sigStruct.sa_mask, SIGVTALRM)) {
+
     perror("sigaddset error");
     exit(EXIT_FAILURE);
   }
 }
 
 void preempt_start(void) {
+
+  struct sigaction sigStruct;
+  struct itimerval timer;
+
   sigemptyset(&sigStruct.sa_mask);
   if (sigaddset(&sigStruct.sa_mask, SIGVTALRM)) {
     perror("sigaddset error");
