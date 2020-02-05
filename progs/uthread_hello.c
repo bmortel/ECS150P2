@@ -11,7 +11,7 @@
 
 int thread1(void* arg){
     printf("thread1\n");
-    return5;
+    return 5;
 }
 
 int main(void){
@@ -20,5 +20,5 @@ int main(void){
     tid = uthread_create(thread1, NULL);
     uthread_join(tid, &ret);
     printf("thread1 returned %d\n", ret);
-    return0;
+    return 0;
 }

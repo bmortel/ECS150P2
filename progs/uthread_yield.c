@@ -22,13 +22,13 @@ int thread2(void *arg) {
     printf("thread2\n");
     uthread_join(tid[0], &ret);
     printf("thread1 returned %d\n", ret);
-    return2;
+    return 2;
 }
 
 int thread1(void *arg) {
     tid[1] = uthread_create(thread2, NULL);
     printf("thread1\n");
-    return1;
+    return 1;
 }
 
 int main(void) {
@@ -37,6 +37,6 @@ int main(void) {
     uthread_yield();
     uthread_join(tid[1], &ret);
     printf("thread2 returned %d\n", ret);
-    return0;
+    return 0;
 }
 

@@ -130,13 +130,13 @@ int uthread_join(uthread_t tid, int *retval)
 
     // Yield until there are no more threads ready to run
     while(joining->curState != zombie) {
-
         uthread_yield();
     }
     *retval = joining->retval;
     queue_delete(zombieQueue, joining);
     queue_delete(blockedQueue, prev);
     currTcb = prev;
+    currTcb->curState = ready;
     free(joining);
     uthread_yield();
 
