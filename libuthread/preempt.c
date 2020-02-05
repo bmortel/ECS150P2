@@ -16,32 +16,31 @@
  */
 #define HZ 100
 
-sigset_t set;
+struct sigaction sigStruct;
+struct itimerval timer;
+
 
 void signalHandler(int signum) { uthread_yield(); }
 
 void preempt_disable(void) {
-  /* TODO Phase 4 */
-  if (sigdelset(&set, SIGVTALRM)) {
+  // Remove SIGVTALRM from mask
+  if (sigdelset(&sigStruct.sa_mask, SIGVTALRM)) {
     perror("sigdelset error");
     exit(EXIT_FAILURE);
   }
 }
 
 void preempt_enable(void) {
-  /* TODO Phase 4 */
-  if (sigaddset(&set, SIGVTALRM)) {
+  // Add SIGVTALRM back to mask
+  if (sigaddset(&sigStruct.sa_mask, SIGVTALRM)) {
     perror("sigaddset error");
     exit(EXIT_FAILURE);
   }
 }
 
 void preempt_start(void) {
-  /* TODO Phase 4 */
-  struct sigaction sigStruct;
-  struct itimerval timer;
   sigemptyset(&sigStruct.sa_mask);
-  if (sigaddset(&set, SIGVTALRM)) {
+  if (sigaddset(&sigStruct.sa_mask, SIGVTALRM)) {
     perror("sigaddset error");
     exit(EXIT_FAILURE);
   }
