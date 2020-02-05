@@ -26,17 +26,16 @@ bool init = false;
 void uthread_yield(void)
 {
     void* tcb = malloc(sizeof(struct Tcb));
-    uthread_ctx_t* prev = currTcb->ctx;
+    uthread_ctx_t prev = currTcb->ctx;
 
     if (currTcb->curState != blocked) {
         queue_enqueue(readyQueue, currTcb);
     }
 	if (queue_dequeue(readyQueue,tcb) != -1) {
 
-        uthread_ctx_switch(prev, ((struct Tcb *) tcb)->ctx);
+        uthread_ctx_switch(&prev, (&((struct Tcb *) tcb)->ctx));
         currTcb = (struct Tcb *) tcb;
         currTcb->curState = running;
-        printf("%d\n",currTcb->tid);
     }
 }
 
@@ -50,13 +49,9 @@ int uthread_create(uthread_func_t func, void *arg)
     if (!init) {
         uthread_init(func, arg);
     }
-    printf("hi\n");
     struct Tcb* tb = malloc(sizeof(struct Tcb));
-    printf("hi\n");
-    tb->ctx = malloc(sizeof(uthread_ctx_t));
-    printf("hi\n");
     tb->stack = uthread_ctx_alloc_stack();
-    if (uthread_ctx_init(tb->ctx, tb->stack, func, arg) == -1) {
+    if (uthread_ctx_init(&tb->ctx, tb->stack, func, arg) == -1) {
         return -1;
     }
     TIDCount++;
@@ -94,7 +89,7 @@ int uthread_join(uthread_t tid, int *retval)
 
     while (queue_length(blockedQueue) != 0) {
         if (queue_dequeue(blockedQueue,tcb) != -1) {
-            uthread_ctx_switch(NULL, ((struct Tcb *) tcb)->ctx);
+            uthread_ctx_switch(NULL, (&((struct Tcb *) tcb)->ctx));
             currTcb = (struct Tcb *) tcb;
             currTcb->curState = running;
 
@@ -111,7 +106,6 @@ void uthread_init(uthread_func_t func, void *arg) {
     struct Tcb* main = (struct Tcb*)malloc(sizeof(struct Tcb));
     main->tid = 0;
     main->stack = uthread_ctx_alloc_stack();
-    main->ctx = malloc(sizeof(uthread_ctx_t));
     currTcb = main;
 }
 

@@ -9,7 +9,7 @@ enum state{ready, running, blocked, zombie};
 
 struct Tcb {
     uthread_t tid;
-    ucontext_t* ctx;
+    ucontext_t ctx;
     void* stack;
     enum state curState;
 };
