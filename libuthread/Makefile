@@ -8,20 +8,14 @@ CFLAGS  += -g
 
 all: $(lib)
 
-queue.o: queue.c queue.h
-	$(CC) $(CFLAGS) queue.c queue.h
+deps := $(patsubst %.o, %.d, $(objs))
+-include $(deps)
 
-uthread.o: uthread.c uthread.h
-	$(CC) $(CFLAGS) uthread.c uthread.h
-
-context.o: context.c context.h
-	$(CC) $(CFLAGS) context.c context.h
-
-preempt.o: preempt.c preempt.h
-	$(CC) $(CFLAGS) preempt.c preempt.h
+%.o: %.c %.h
+	$(CC) $(CFLAGS) -c -o $@ $<
 
 libuthread.a: queue.o uthread.o context.o preempt.o
 	ar rcs $(lib) $(objs)
 
 clean:
-	rm -f *.o *.a *.gch *.h.gch
+	rm -f $(lib) $(objs) $(deps)
