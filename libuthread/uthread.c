@@ -54,7 +54,7 @@ int uthread_create(uthread_func_t func, void *arg)
     
     // Check if library has been initialized
     if (!init) {
-        uthread_init(func, arg);
+        uthread_init();
     }
 
     struct Tcb* tb = malloc(sizeof(struct Tcb));
@@ -71,6 +71,8 @@ int uthread_create(uthread_func_t func, void *arg)
     //preempt_disable();
     TIDCount++;
     tb->tid = TIDCount;
+
+    tb->joined = NULL;
 
     // Change the state of the newly created thread to ready
     tb->curState = ready;
@@ -91,7 +93,11 @@ void uthread_exit(int retval)
     struct Tcb* prev = currTcb;
 
     // Deque the oldest thread in the ready queue and switch contexts to run next thread
-    if (queue_dequeue(readyQueue, &tcb) != -1) {
+    if (currTcb->joined != NULL) {
+        currTcb = currTcb->joined;
+        uthread_ctx_switch(&(prev->ctx), &(currTcb->ctx));
+    }
+    else if (queue_dequeue(readyQueue, &tcb) != -1) {
         currTcb = (struct Tcb *) tcb;
         currTcb->curState = running;
         uthread_ctx_switch(&(prev->ctx), &(currTcb->ctx));
@@ -119,6 +125,7 @@ int uthread_join(uthread_t tid, int *retval)
         return -1;
     }
     struct Tcb* joining = (struct Tcb*) tcb;
+    joining->joined = currTcb;
 
 
     // Look through zombie queue
