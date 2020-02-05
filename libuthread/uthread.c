@@ -99,17 +99,9 @@ int uthread_join(uthread_t tid, int *retval)
             uthread_yield();
         }
     }
-    printf("%d",2);
 
-    // Run the blocked threads
-    while (queue_length(blockedQueue) != 0) {
-        if (queue_dequeue(blockedQueue,&tcb) != -1) {
-            uthread_ctx_switch(NULL, (&((struct Tcb *) tcb)->ctx));
-            currTcb = (struct Tcb *) tcb;
-            currTcb->curState = running;
 
-        }
-    }
+
     return 1;
 
 }
