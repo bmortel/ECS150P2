@@ -91,4 +91,6 @@ int uthread_join(uthread_t tid, int *retval);
  */
 void uthread_init(uthread_func_t func, void *arg);
 
+//queue_func_t check_tid(void * tcb, uthread_t tid2);
+
 #endif /* _THREAD_H */

@@ -1,10 +1,10 @@
 # Target programs
 #  **Add more lines to this variable in order to compile more programs**
 programs := \
-	test_queue.x
-#	uthread_hello.x \
-#	uthread_yield.x \
-	test_queue.x
+	test_queue.x \
+	uthread_hello.x \
+	uthread_yield.x
+
 
 ## *** IMPORTANT *** ##
 ##	You should NOT have to modify anything below
