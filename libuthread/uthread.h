@@ -89,7 +89,7 @@ int uthread_join(uthread_t tid, int *retval);
  * This function initializes the uthread library by initializing a thread
  * control block queue and enqueuing the main thread with tid 0.
  */
-void uthread_init(uthread_func_t func, void *arg);
+void uthread_init();
 
 //queue_func_t check_tid(void * tcb, uthread_t tid2);
 

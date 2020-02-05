@@ -143,7 +143,7 @@ int uthread_join(uthread_t tid, int *retval)
     return 1;
 
 }
-void uthread_init(uthread_func_t func, void *arg) {
+void uthread_init() {
 
     // Assign queues for different state
     readyQueue = queue_create();
@@ -151,12 +151,12 @@ void uthread_init(uthread_func_t func, void *arg) {
     blockedQueue = queue_create();
 
     // Create a thread for main
-    struct Tcb* main = (struct Tcb*)malloc(sizeof(struct Tcb));
-    main->tid = 0;
-    main->stack = uthread_ctx_alloc_stack();
+    struct Tcb* mainT = (struct Tcb*)malloc(sizeof(struct Tcb));
+    mainT->tid = 0;
+    mainT->stack = uthread_ctx_alloc_stack();
 
     // Set the current thread to main
-    currTcb = main;
+    currTcb = mainT;
     init = true;
     //preempt_start();
 }
