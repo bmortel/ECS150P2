@@ -47,6 +47,7 @@ int queue_enqueue(queue_t queue, void *data)
 
     if (queue->head == NULL) {
         queue->head = nextN;
+        queue->curr = queue->head;
     }
     else {
         queue->curr->next = nextN;
