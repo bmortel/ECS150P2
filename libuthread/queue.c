@@ -143,16 +143,4 @@ int queue_length(queue_t queue)
     
 }
 
-/*
-int main() {
-    queue_t q;
-    int data = 3, *ptr;
 
-    q = queue_create();
-    printf("%d\n",queue_enqueue(q, &data));
-    printf("%d\n",queue_dequeue(q, (void**)&ptr));
-
-
-    return 0;
-};
-*/
