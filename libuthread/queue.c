@@ -63,7 +63,7 @@ int queue_dequeue(queue_t queue, void **data)
     if ((data) == NULL || queue == NULL || queue->head == NULL ){
         return -1;
     }
-    struct ListNode* tempHead = queue->head->next->next;
+    struct ListNode* tempHead = queue->head->next;
 
 
     // Assign the oldest item in the queue to the data pointer
