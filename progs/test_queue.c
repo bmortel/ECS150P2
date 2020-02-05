@@ -5,6 +5,7 @@
 #include <assert.h>
 #include "queue.h"
 #include "LinkedList.h"
+#include "mcheck.h"
 
 
 
@@ -91,6 +92,13 @@ void test_iterator_nullQ(){
     assert(retval == -1);
 }
 
+void test_iterator_noFunc(){
+    queue_t q = queue_create();
+    int* ptr;
+    int retval = queue_iterate(q, NULL, (void*)2, (void**)&ptr );
+    assert(retval == -1);
+}
+
 void test_enqueue_nullData(){
     queue_t q = queue_create();
     assert(queue_enqueue(q, NULL) == -1);
@@ -123,6 +131,45 @@ void test_delete(void){
 
 }
 
+void test_delete_NULLQ(void){
+    queue_t q;
+    q = queue_create();
+
+    int array[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+    int i;
+
+    for (i = 0; i < sizeof(array) / sizeof(array[0]); i++)
+        queue_enqueue(q, &array[i]);
+
+    queue_destroy(q);
+    q = NULL;
+
+    assert(queue_delete(q, &array[4]) == -1);
+}
+
+void test_delete_NULLData(void){
+    queue_t q;
+    q = queue_create();
+
+    int array[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+    int i;
+
+    for (i = 0; i < sizeof(array) / sizeof(array[0]); i++)
+        queue_enqueue(q, &array[i]);
+
+    assert(queue_delete(q, NULL) == -1);
+}
+
+void test_delete_EmptyQ(void){
+    queue_t q;
+    q = queue_create();
+    int data = 5;
+
+    assert(queue_delete(q, &data) == -1);
+}
+
+
+
 
 
 void test_destroy(){
@@ -143,7 +190,7 @@ void test_destroy(){
     queue_destroy(q);
 
 // free should throw error if queue_destroy succeeds 
-   // free(q);
+    //free(q);
 
 }
 
@@ -177,6 +224,22 @@ void test_queue_length(){
     assert(queue_length(q) == 2);
 }
 
+void test_queue_length_nullQ(){
+    queue_t q = queue_create();
+    int data[] = {1, 2};
+    assert(queue_length(q) == 0);
+    queue_enqueue(q, &data[0]);
+    assert(queue_length(q) == 1);
+    queue_enqueue(q, &data[1]);
+    assert(queue_length(q) == 2);
+
+    queue_destroy(q);
+    q = NULL;
+
+    assert(queue_length(q) == -1);
+}
+
+
 void test_dequeue_emptyQ(){
     queue_t q = queue_create();
     int data = 2;
@@ -184,35 +247,51 @@ void test_dequeue_emptyQ(){
 
 }
 
+void test_dequeue_nullData(void)
+{
+    queue_t q;
+    int i = 3;
+    q = queue_create();
+    queue_enqueue(q, &i);
+    assert(queue_dequeue(q, NULL) == -1);
+    
+}
+
+void test_dequeue_nullQ(void)
+{
+    queue_t q;
+    int data = 3, *ptr;
+    q = queue_create();
+    queue_enqueue(q, &data);
+    queue_destroy(q);
+    q = NULL;
+    assert(queue_dequeue(q, (void**)&ptr) == -1);
+    
+}
+
 
 
 
 int main(){
-
     test_create();
-    printf("1\n");
-    test_queue_simple();
-    printf("2\n");
-    test_enqueue_nullData();
-    printf("3\n");
-    test_enqueue_nullQueue();
-    printf("4\n");
-    test_iterator();
-    printf("5\n");
-    test_iterator_emptyQ();
-    printf("6\n");
-    test_iterator_nullQ();
-    printf("7\n");
+    test_delete_EmptyQ();
+    test_delete_NULLData();
+    test_delete_NULLQ();
     test_delete();
-    printf("8\n");
-    test_destroy();
-    printf("9\n");
-    test_destroy_nonemptyQ();
-    printf("10\n");
-    test_destroy_nullQ();
-    printf("11\n");
-    test_queue_length();
-    printf("12\n");
     test_dequeue_emptyQ();
-    printf("13\n");
+    test_dequeue_nullData();
+    test_dequeue_nullQ();
+    test_destroy();
+    test_destroy_nonemptyQ();
+    test_destroy_nullQ();
+    test_enqueue_nullData();
+    test_enqueue_nullQueue();
+    test_iterator();
+    test_iterator_emptyQ();
+    test_iterator_noFunc();
+    test_iterator_nullQ();
+    test_queue_length();
+    test_queue_length_nullQ();
+    test_queue_simple();
+
 }
