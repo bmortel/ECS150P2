@@ -19,8 +19,9 @@
 struct sigaction sigStruct;
 struct itimerval timer;
 
-
+// Force running thread to yield
 void signalHandler(int signum) { uthread_yield(); }
+
 
 void preempt_disable(void) {
 
@@ -44,22 +45,26 @@ void preempt_enable(void) {
 
 void preempt_start(void) {
 
-  struct sigaction sigStruct;
-  struct itimerval timer;
-
+	// Set mask to empty set then add SIGVTALRM to mask
   sigemptyset(&sigStruct.sa_mask);
   if (sigaddset(&sigStruct.sa_mask, SIGVTALRM)) {
     perror("sigaddset error");
     exit(EXIT_FAILURE);
   }
+
+	// Install signal handler
   sigStruct.sa_flags = 0;
   sigStruct.sa_handler = signalHandler;
   if (sigaction(SIGVTALRM, &sigStruct, NULL) == -1) {
     perror("sigaction error");
     exit(EXIT_FAILURE);
   }
+
+  // Set alarm initial tick and interval
   timer.it_value.tv_sec = 1 / HZ;
   timer.it_interval = timer.it_value;
+
+  // Initialize timer
   if (setitimer(ITIMER_VIRTUAL, &timer, NULL) == -1) {
     perror("settimer error");
     exit(EXIT_FAILURE);
