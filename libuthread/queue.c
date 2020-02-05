@@ -137,8 +137,9 @@ int queue_iterate(queue_t queue, queue_func_t func, void *arg, void **data)
 
 int queue_length(queue_t queue)
 {
-    if (queue == NULL)
+    if (queue == NULL) {
         return -1;
+    }
 	return queue->length;
     
 }
