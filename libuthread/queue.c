@@ -67,12 +67,14 @@ int queue_dequeue(queue_t queue, void **data)
         (*data) = queue->head->item;
         queue->head = NULL;
     }
-    struct ListNode* tempHead = queue->head->next;
-    // Assign the oldest item in the queue to the data pointer
-    (*data) = queue->head->item;
-    free(queue->head);
-    queue->head = tempHead;
-	queue->length--;
+    else {
+        struct ListNode *tempHead = queue->head->next;
+        // Assign the oldest item in the queue to the data pointer
+        (*data) = queue->head->item;
+        free(queue->head);
+        queue->head = tempHead;
+        queue->length--;
+    }
 
 	return 0;
 }
