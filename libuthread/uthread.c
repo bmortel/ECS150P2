@@ -127,6 +127,7 @@ void uthread_init(uthread_func_t func, void *arg) {
 
     // Set the current thread to main
     currTcb = main;
+    init = true;
 }
 
 /*

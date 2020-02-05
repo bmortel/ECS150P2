@@ -21,7 +21,7 @@ sigset_t set;
 void signalHandler(int signum) { uthread_yield(); }
 
 void preempt_disable(void) {
-  /* TODO Phase 4 */
+
   if (sigdelset(&set, SIGVTALRM)) {
     perror("sigdelset error");
     exit(EXIT_FAILURE);
@@ -29,7 +29,7 @@ void preempt_disable(void) {
 }
 
 void preempt_enable(void) {
-  /* TODO Phase 4 */
+
   if (sigaddset(&set, SIGVTALRM)) {
     perror("sigaddset error");
     exit(EXIT_FAILURE);
@@ -37,7 +37,7 @@ void preempt_enable(void) {
 }
 
 void preempt_start(void) {
-  /* TODO Phase 4 */
+
   struct sigaction sigStruct;
   struct itimerval timer;
   sigemptyset(&sigStruct.sa_mask);
