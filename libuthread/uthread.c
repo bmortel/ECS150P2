@@ -28,11 +28,14 @@ void uthread_yield(void)
     void* tcb = malloc(sizeof(struct Tcb));
     uthread_ctx_t prev = currTcb->ctx;
 
+    // If current state is not blocked, add it to ready queue
     if (currTcb->curState != blocked) {
+        currTcb->curState = ready;
         queue_enqueue(readyQueue, currTcb);
     }
+
+    // Deque the oldest thread in the ready queue and switch contexts
 	if (queue_dequeue(readyQueue, &tcb) != -1) {
-	    printf("h");
 
         uthread_ctx_switch(&prev, (&((struct Tcb *) tcb)->ctx));
         currTcb = (struct Tcb *) tcb;
@@ -47,17 +50,22 @@ uthread_t uthread_self(void)
 
 int uthread_create(uthread_func_t func, void *arg)
 {
+
+    // Check if library has been initialized
     if (!init) {
         uthread_init(func, arg);
     }
-    printf("j");
 
     struct Tcb* tb = malloc(sizeof(struct Tcb));
+    // Allocate memory for stack
     tb->stack = uthread_ctx_alloc_stack();
+
+    // Initialize the context and check if there is an error
     if (uthread_ctx_init(&tb->ctx, tb->stack, func, arg) == -1) {
         return -1;
     }
-    printf("k");
+
+    // Increment the tid and assign the tid to the newly created thread
     TIDCount++;
     tb->tid = TIDCount;
     tb->curState = ready;
@@ -77,10 +85,11 @@ int uthread_join(uthread_t tid, int *retval)
     void* foundTcb = NULL;
     void* tcb = NULL;
 
+    // Change the current joining thread to block threads
     queue_enqueue(blockedQueue, currTcb);
     currTcb->curState = blocked;
 
-
+    // Yield until there are no more threads ready to run
     while(1) {
 
         if (queue_length(readyQueue) == 0) {
@@ -90,8 +99,9 @@ int uthread_join(uthread_t tid, int *retval)
             uthread_yield();
         }
     }
-    printf("i");
+    printf("%d",2);
 
+    // Run the blocked threads
     while (queue_length(blockedQueue) != 0) {
         if (queue_dequeue(blockedQueue,&tcb) != -1) {
             uthread_ctx_switch(NULL, (&((struct Tcb *) tcb)->ctx));
@@ -104,12 +114,18 @@ int uthread_join(uthread_t tid, int *retval)
 
 }
 void uthread_init(uthread_func_t func, void *arg) {
+
+    // Assign queues for different state
     readyQueue = queue_create();
     zombieQueue = queue_create();
     blockedQueue = queue_create();
+
+    // Create a thread for main
     struct Tcb* main = (struct Tcb*)malloc(sizeof(struct Tcb));
     main->tid = 0;
     main->stack = uthread_ctx_alloc_stack();
+
+    // Set the current thread to main
     currTcb = main;
 }
 
