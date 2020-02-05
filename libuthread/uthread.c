@@ -28,27 +28,15 @@ void uthread_yield(void)
     void* tcb = malloc(sizeof(struct Tcb));
     struct Tcb* prev = currTcb;
 
-    // If current state is not blocked, add it to ready queue
-    printf("%daa\n", currTcb->tid);
-
+    // Add current thread to queue so it can resume later
     queue_enqueue(readyQueue, currTcb);
-    printf("%dlength\n",queue_length(readyQueue));
-
-
-
 
     // Deque the oldest thread in the ready queue and switch contexts
     if (queue_dequeue(readyQueue, &tcb) != -1) {
         struct Tcb* next = (struct Tcb*)tcb;
-        printf("%dtid\n",next->tid);
         currTcb = next;
-
         currTcb->curState = running;
-
         uthread_ctx_switch(&(prev->ctx), &(currTcb->ctx));
-
-
-
     }
 }
 
@@ -66,6 +54,7 @@ int uthread_create(uthread_func_t func, void *arg)
     }
 
     struct Tcb* tb = malloc(sizeof(struct Tcb));
+
     // Allocate memory for stack
     tb->stack = uthread_ctx_alloc_stack();
 
@@ -77,9 +66,10 @@ int uthread_create(uthread_func_t func, void *arg)
     // Increment the tid and assign the tid to the newly created thread
     TIDCount++;
     tb->tid = TIDCount;
+
+    // Change the state of the newly created thread to ready
     tb->curState = ready;
     queue_enqueue(readyQueue, tb);
-    printf("%d\n",tb->tid);
 
     return TIDCount;
 }
@@ -92,6 +82,7 @@ void uthread_exit(int retval)
 
     void* tcb = malloc(sizeof(struct Tcb));
     struct Tcb* prev = currTcb;
+
     // Deque the oldest thread in the ready queue and switch contexts to run next thread
     if (queue_dequeue(readyQueue, &tcb) != -1) {
         currTcb = (struct Tcb *) tcb;
@@ -104,15 +95,9 @@ void uthread_exit(int retval)
 
 int uthread_join(uthread_t tid, int *retval)
 {
-    void* foundTcb = NULL;
 
     void* tcb = malloc(sizeof(struct Tcb));
     struct Tcb* prev = currTcb;
-
-
-    // Change the current joining thread to block threads
-    queue_enqueue(blockedQueue, currTcb);
-    currTcb->curState = blocked;
 
     // Yield until there are no more threads ready to run
     while(1) {
@@ -121,19 +106,15 @@ int uthread_join(uthread_t tid, int *retval)
             break;
         }
         else{
+
+            // Dequeue the oldest thread in queue then switch to it
             if (queue_dequeue(readyQueue, &tcb) != -1) {
                 currTcb = (struct Tcb *) tcb;
-
                 currTcb->curState = running;
                 uthread_ctx_switch(&(prev->ctx), &(currTcb->ctx));
-
-
-
             }
         }
     }
-
-
 
     return 1;
 
