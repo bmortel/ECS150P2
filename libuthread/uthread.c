@@ -30,7 +30,9 @@ void uthread_yield(void)
     struct Tcb* prev = currTcb;
 
     // Add current thread to queue so it can resume later
-    queue_enqueue(readyQueue, currTcb);
+    if (currTcb->curState != blocked) {
+        queue_enqueue(readyQueue, currTcb);
+    }
 
     // Deque the oldest thread in the ready queue and switch contexts
     if (queue_dequeue(readyQueue, &tcb) != -1) {
@@ -128,6 +130,7 @@ int uthread_join(uthread_t tid, int *retval)
 
     // Yield until there are no more threads ready to run
     while(joining->curState != zombie) {
+
         uthread_yield();
     }
     *retval = joining->retval;
