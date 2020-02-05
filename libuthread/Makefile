@@ -6,6 +6,10 @@ CC      := gcc
 CFLAGS  := -Wall -Wextra -Werror
 CFLAGS  += -g
 
+ifneq ($(V),1)
+Q = @
+endif
+
 all: $(lib)
 
 deps := $(patsubst %.o, %.d, $(objs))
@@ -18,4 +22,5 @@ libuthread.a: queue.o uthread.o context.o preempt.o
 	ar rcs $(lib) $(objs)
 
 clean:
-	rm -f $(lib) $(objs) $(deps)
+    @echo "CLEAN"
+	$(Q)rm -f $(lib) $(objs) $(deps)
