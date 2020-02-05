@@ -74,8 +74,18 @@ int uthread_create(uthread_func_t func, void *arg)
 
 void uthread_exit(int retval)
 {
+    // Change current thread's state into zombie
     currTcb->curState = zombie;
     queue_enqueue(zombieQueue, currTcb);
+
+    void* tcb = malloc(sizeof(struct Tcb));
+    uthread_ctx_t prev = currTcb->ctx;
+    // Deque the oldest thread in the ready queue and switch contexts to run next thread
+    if (queue_dequeue(readyQueue, &tcb) != -1) {
+        uthread_ctx_switch(&prev, (&((struct Tcb *) tcb)->ctx));
+        currTcb = (struct Tcb *) tcb;
+        currTcb->curState = running;
+    }
 
 }
 
