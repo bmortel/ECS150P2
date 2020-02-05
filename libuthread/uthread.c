@@ -29,10 +29,9 @@ void uthread_yield(void)
     uthread_ctx_t prev = currTcb->ctx;
 
     // If current state is not blocked, add it to ready queue
-    if (currTcb->curState != blocked) {
-        currTcb->curState = ready;
-        queue_enqueue(readyQueue, currTcb);
-    }
+
+    queue_enqueue(readyQueue, currTcb);
+
 
     // Deque the oldest thread in the ready queue and switch contexts
 	if (queue_dequeue(readyQueue, &tcb) != -1) {
