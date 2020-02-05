@@ -9,7 +9,7 @@
 #include <limits.h>
 
 #include "context.h"
-//#include "preempt.h"
+#include "preempt.h"
 #include "queue.h"
 #include "uthread.h"
 #include "ThreadControlBlock.h"
@@ -25,6 +25,7 @@ static bool init = false;
 
 void uthread_yield(void)
 {
+    preempt_disable();
     void* tcb = malloc(sizeof(struct Tcb));
     struct Tcb* prev = currTcb;
 
@@ -38,6 +39,7 @@ void uthread_yield(void)
         currTcb->curState = running;
         uthread_ctx_switch(&(prev->ctx), &(currTcb->ctx));
     }
+    preempt_enable();
 }
 
 uthread_t uthread_self(void)
@@ -47,7 +49,7 @@ uthread_t uthread_self(void)
 
 int uthread_create(uthread_func_t func, void *arg)
 {
-
+    
     // Check if library has been initialized
     if (!init) {
         uthread_init(func, arg);
@@ -64,18 +66,20 @@ int uthread_create(uthread_func_t func, void *arg)
     }
 
     // Increment the tid and assign the tid to the newly created thread
+    preempt_disable();
     TIDCount++;
     tb->tid = TIDCount;
 
     // Change the state of the newly created thread to ready
     tb->curState = ready;
     queue_enqueue(readyQueue, tb);
-
+    preempt_enable();
     return TIDCount;
 }
 
 void uthread_exit(int retval)
-{
+{   
+    preempt_disable();
     // Change current thread's state into zombie
     currTcb->curState = zombie;
     queue_enqueue(zombieQueue, currTcb);
@@ -90,6 +94,7 @@ void uthread_exit(int retval)
         uthread_ctx_switch(&(prev->ctx), &(currTcb->ctx));
 
     }
+    preempt_enable();
 
 }
 
@@ -108,11 +113,13 @@ int uthread_join(uthread_t tid, int *retval)
         else{
 
             // Dequeue the oldest thread in queue then switch to it
+            preempt_disable();
             if (queue_dequeue(readyQueue, &tcb) != -1) {
                 currTcb = (struct Tcb *) tcb;
                 currTcb->curState = running;
                 uthread_ctx_switch(&(prev->ctx), &(currTcb->ctx));
             }
+            preempt_enable();
         }
     }
 
@@ -134,6 +141,7 @@ void uthread_init(uthread_func_t func, void *arg) {
     // Set the current thread to main
     currTcb = main;
     init = true;
+    preempt_start();
 }
 
 /*
