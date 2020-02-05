@@ -14,12 +14,12 @@
 #include "uthread.h"
 #include "ThreadControlBlock.h"
 
-uthread_t TIDCount = 0;
-queue_t readyQueue;
-queue_t zombieQueue;
-queue_t blockedQueue;
-struct Tcb* currTcb;
-bool init = false;
+static uthread_t TIDCount = 0;
+static queue_t readyQueue;
+static queue_t zombieQueue;
+static queue_t blockedQueue;
+static struct Tcb* currTcb;
+static bool init = false;
 
 //queue_func_t check_tid(void * tcb, uthread_t tid2);
 
