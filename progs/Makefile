@@ -1,7 +1,7 @@
 # Target programs
 #  **Add more lines to this variable in order to compile more programs**
 programs := \
-	queue_tester.x \
+	test_queue.x \
 	uthread_hello.x \
 	uthread_yield.x
 
