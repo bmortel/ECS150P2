@@ -31,7 +31,7 @@ void uthread_yield(void)
     if (currTcb->curState != blocked) {
         queue_enqueue(readyQueue, currTcb);
     }
-	if (queue_dequeue(readyQueue,tcb) != -1) {
+	if (queue_dequeue(readyQueue, &tcb) != -1) {
 	    printf("h");
 
         uthread_ctx_switch(&prev, (&((struct Tcb *) tcb)->ctx));
@@ -93,7 +93,7 @@ int uthread_join(uthread_t tid, int *retval)
     printf("i");
 
     while (queue_length(blockedQueue) != 0) {
-        if (queue_dequeue(blockedQueue,tcb) != -1) {
+        if (queue_dequeue(blockedQueue,&tcb) != -1) {
             uthread_ctx_switch(NULL, (&((struct Tcb *) tcb)->ctx));
             currTcb = (struct Tcb *) tcb;
             currTcb->curState = running;
