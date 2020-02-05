@@ -19,9 +19,7 @@ struct queue {
 queue_t queue_create(void)
 {
 	queue_t myQueue = (queue_t) malloc(sizeof(struct queue));
-    myQueue->head = (struct ListNode *) malloc(sizeof(struct ListNode));
-    myQueue->head->next = NULL;
-    myQueue->head->item = NULL;
+    myQueue->head = NULL;
     myQueue->curr = myQueue->head;
 	myQueue->length = 0;
 	return myQueue;
@@ -29,7 +27,7 @@ queue_t queue_create(void)
 
 int queue_destroy(queue_t queue)
 {
-	if (queue == NULL || queue->length != 0){
+	if (queue == NULL || queue->length != 0|| queue->head == NULL){
         return -1;
     }
     free(queue->head);
@@ -47,10 +45,14 @@ int queue_enqueue(queue_t queue, void *data)
     nextN->next = NULL;
     nextN->item = data;
 
-
-	queue->curr->next = nextN;
-	queue->curr = queue->curr->next;
-	queue->length++;
+    if (queue->head == NULL) {
+        queue->head = nextN;
+    }
+    else {
+        queue->curr->next = nextN;
+        queue->curr = queue->curr->next;
+    }
+    queue->length++;
     
 	return 0;
 }
@@ -58,7 +60,7 @@ int queue_enqueue(queue_t queue, void *data)
 int queue_dequeue(queue_t queue, void **data)
 {
     // If data or queue is empty, return -1
-    if ((data) == NULL || queue == NULL || queue->head->next == NULL ){
+    if ((data) == NULL || queue == NULL || queue->head == NULL ){
         return -1;
     }
     struct ListNode* tempHead = queue->head->next->next;
@@ -78,16 +80,16 @@ int queue_delete(queue_t queue, void *data)
     if (queue == NULL || (data) == NULL || queue->head == NULL) {
 	     return -1;
 	}
-    struct ListNode* curr = queue->head->next;
+    struct ListNode* curr = queue->head;
     struct ListNode* prev = NULL;
-
 
 	while(curr != NULL) {
 	    if ((data) == ((curr->item))) {
             // If @data found in first ListNode
             if (prev == NULL) {
-                queue->head->next = curr->next;
-                free(curr);
+                prev = queue->head;
+                queue->head = curr->next;
+                free(prev);
                 queue->length--;
             }
             else {
@@ -110,7 +112,7 @@ int queue_iterate(queue_t queue, queue_func_t func, void *arg, void **data)
         return -1;
     }
 
-    struct ListNode* curr = queue->head->next;
+    struct ListNode* curr = queue->head;
 
     // while not at the end of the list
     while(curr != NULL){

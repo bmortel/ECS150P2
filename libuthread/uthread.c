@@ -29,22 +29,32 @@ void uthread_yield(void)
     struct Tcb* prev = currTcb;
 
     // If current state is not blocked, add it to ready queue
+    printf("%daa\n", currTcb->tid);
 
     queue_enqueue(readyQueue, currTcb);
+    printf("%dlength\n",queue_length(readyQueue));
+
+
 
 
     // Deque the oldest thread in the ready queue and switch contexts
-	if (queue_dequeue(readyQueue, &tcb) != -1) {
+    if (queue_dequeue(readyQueue, &tcb) != -1) {
+        struct Tcb* next = (struct Tcb*)tcb;
+        printf("%dtid\n",next->tid);
+        currTcb = next;
 
-        uthread_ctx_switch(&(prev->ctx), (&((struct Tcb *) tcb)->ctx));
-        currTcb = (struct Tcb *) tcb;
         currTcb->curState = running;
+
+        uthread_ctx_switch(&(prev->ctx), &(currTcb->ctx));
+
+
+
     }
 }
 
 uthread_t uthread_self(void)
 {
-	return currTcb->tid;
+    return currTcb->tid;
 }
 
 int uthread_create(uthread_func_t func, void *arg)
@@ -69,6 +79,8 @@ int uthread_create(uthread_func_t func, void *arg)
     tb->tid = TIDCount;
     tb->curState = ready;
     queue_enqueue(readyQueue, tb);
+    printf("%d\n",tb->tid);
+
     return TIDCount;
 }
 
@@ -82,9 +94,10 @@ void uthread_exit(int retval)
     struct Tcb* prev = currTcb;
     // Deque the oldest thread in the ready queue and switch contexts to run next thread
     if (queue_dequeue(readyQueue, &tcb) != -1) {
-        uthread_ctx_switch(&(prev->ctx), (&((struct Tcb *) tcb)->ctx));
         currTcb = (struct Tcb *) tcb;
         currTcb->curState = running;
+        uthread_ctx_switch(&(prev->ctx), &(currTcb->ctx));
+
     }
 
 }
@@ -92,7 +105,10 @@ void uthread_exit(int retval)
 int uthread_join(uthread_t tid, int *retval)
 {
     void* foundTcb = NULL;
-    void* tcb = NULL;
+
+    void* tcb = malloc(sizeof(struct Tcb));
+    struct Tcb* prev = currTcb;
+
 
     // Change the current joining thread to block threads
     queue_enqueue(blockedQueue, currTcb);
@@ -105,7 +121,15 @@ int uthread_join(uthread_t tid, int *retval)
             break;
         }
         else{
-            uthread_yield();
+            if (queue_dequeue(readyQueue, &tcb) != -1) {
+                currTcb = (struct Tcb *) tcb;
+
+                currTcb->curState = running;
+                uthread_ctx_switch(&(prev->ctx), &(currTcb->ctx));
+
+
+
+            }
         }
     }
 
