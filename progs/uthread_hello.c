@@ -9,18 +9,16 @@
 
 #include <uthread.h>
 
-int hello(void* arg)
-{
-	printf("Hello world!\n");
-	return 0;
+int thread1(void* arg){
+    printf("thread1\n");
+    return5;
 }
 
-int main(void)
-{
-	uthread_t tid;
-
-	tid = uthread_create(hello, NULL);
-	uthread_join(tid, NULL);
-
-	return 0;
+int main(void){
+    int ret;
+    uthread_t tid;
+    tid = uthread_create(thread1, NULL);
+    uthread_join(tid, &ret);
+    printf("thread1 returned %d\n", ret);
+    return0;
 }

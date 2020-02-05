@@ -20,9 +20,9 @@ libuthread.a: $(objs)
 	ar rcs $@ $^
 
 %.o: %.c
-	$(Q) $(CC) $(CFLAGS) -c -o $@ $< $(DEPFLAGS)
-
+	$(Q)$(CC) $(CFLAGS) -c -o $@ $< $(DEPFLAGS)
 
 clean:
 	@echo "CLEAN"
-	$(Q) rm -f $(lib) $(objs) $(deps)
+	$(Q)rm -rf $(lib) $(objs) $(deps)
+
