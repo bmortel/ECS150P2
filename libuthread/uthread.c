@@ -26,7 +26,7 @@ bool init = false;
 void uthread_yield(void)
 {
     void* tcb = malloc(sizeof(struct Tcb));
-    uthread_ctx_t prev = currTcb->ctx;
+    struct Tcb* prev = currTcb;
 
     // If current state is not blocked, add it to ready queue
 
@@ -36,7 +36,7 @@ void uthread_yield(void)
     // Deque the oldest thread in the ready queue and switch contexts
 	if (queue_dequeue(readyQueue, &tcb) != -1) {
 
-        uthread_ctx_switch(&prev, (&((struct Tcb *) tcb)->ctx));
+        uthread_ctx_switch(&(prev->ctx), (&((struct Tcb *) tcb)->ctx));
         currTcb = (struct Tcb *) tcb;
         currTcb->curState = running;
     }
@@ -79,10 +79,10 @@ void uthread_exit(int retval)
     queue_enqueue(zombieQueue, currTcb);
 
     void* tcb = malloc(sizeof(struct Tcb));
-    uthread_ctx_t prev = currTcb->ctx;
+    struct Tcb* prev = currTcb;
     // Deque the oldest thread in the ready queue and switch contexts to run next thread
     if (queue_dequeue(readyQueue, &tcb) != -1) {
-        uthread_ctx_switch(&prev, (&((struct Tcb *) tcb)->ctx));
+        uthread_ctx_switch(&(prev->ctx), (&((struct Tcb *) tcb)->ctx));
         currTcb = (struct Tcb *) tcb;
         currTcb->curState = running;
     }
