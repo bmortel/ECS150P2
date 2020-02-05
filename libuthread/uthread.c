@@ -106,8 +106,9 @@ int uthread_join(uthread_t tid, int *retval)
     if (tid == currTcb->tid || tid == 0) {
         return -1;
     }
+
     void* tcb = malloc(sizeof(struct Tcb));
-    struct Tcb* prev = currTcb;
+
 
     currTcb->curState = blocked;
     queue_enqueue(blockedQueue, currTcb);
@@ -132,15 +133,15 @@ int uthread_join(uthread_t tid, int *retval)
     while(joining->curState != zombie) {
         uthread_yield();
     }
+
     *retval = joining->retval;
     queue_delete(zombieQueue, joining);
     queue_delete(blockedQueue, prev);
-    currTcb = prev;
     currTcb->curState = ready;
     free(joining);
     uthread_yield();
 
-    return 1;
+    return 0;
 
 }
 void uthread_init() {
