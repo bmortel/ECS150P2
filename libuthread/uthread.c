@@ -93,11 +93,15 @@ void uthread_exit(int retval)
     struct Tcb* prev = currTcb;
 
     // Deque the oldest thread in the ready queue and switch contexts to run next thread
+    if (currTcb->joined != NULL) {
+        currTcb = currTcb->joined;
+        currTcb->curState = ready;
+        queue_enqueue(readyQueue, currTcb);
+    }
     if (queue_dequeue(readyQueue, &tcb) != -1) {
         currTcb = (struct Tcb *) tcb;
         currTcb->curState = running;
         uthread_ctx_switch(&(prev->ctx), &(currTcb->ctx));
-
     }
     //preempt_enable();
 
@@ -142,7 +146,6 @@ int uthread_join(uthread_t tid, int *retval)
     queue_delete(zombieQueue, joining);
     queue_delete(blockedQueue, prev);
     currTcb = prev;
-    currTcb->curState = ready;
     free(joining);
     uthread_yield();
 
