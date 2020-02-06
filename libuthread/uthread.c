@@ -23,6 +23,8 @@ static bool init = false;
 
 bool check_tid(void * tcb, uthread_t* tid2);
 
+bool check_waiting(void * tcb, uthread_t* blockedTID)
+
 void uthread_yield(void)
 {
     //preempt_disable();
@@ -71,8 +73,6 @@ int uthread_create(uthread_func_t func, void *arg)
     //preempt_disable();
     TIDCount++;
     tb->tid = TIDCount;
-
-    tb->joined = NULL;
 
     // Change the state of the newly created thread to ready
     tb->curState = ready;

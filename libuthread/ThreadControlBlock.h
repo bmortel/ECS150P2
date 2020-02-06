@@ -14,7 +14,7 @@ struct Tcb {
     enum state curState;
     int retval;
     bool joining;
-    ucontext_t waiting;
+    uthread_t waiting;
 };
 
 
