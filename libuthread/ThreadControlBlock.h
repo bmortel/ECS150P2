@@ -12,6 +12,8 @@ struct Tcb {
     ucontext_t ctx;
     void* stack;
     enum state curState;
+    int retval;
+    struct Tcb* joined;
 };
 
 

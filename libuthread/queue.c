@@ -127,32 +127,22 @@ int queue_iterate(queue_t queue, queue_func_t func, void *arg, void **data)
             if (data != NULL){
             *data = curr->item;
             }
-            break;
+            return 0;
         }
         curr = curr->next;
     }
+    *data = NULL;
 
     return 0;
 }
 
 int queue_length(queue_t queue)
 {
-    if (queue == NULL)
+    if (queue == NULL) {
         return -1;
+    }
 	return queue->length;
     
 }
 
-/*
-int main() {
-    queue_t q;
-    int data = 3, *ptr;
 
-    q = queue_create();
-    printf("%d\n",queue_enqueue(q, &data));
-    printf("%d\n",queue_dequeue(q, (void**)&ptr));
-
-
-    return 0;
-};
-*/

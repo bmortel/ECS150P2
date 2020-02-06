@@ -15,32 +15,28 @@
 
 #include <uthread.h>
 
-int thread3(void* arg)
-{
-	uthread_yield();
-	printf("thread%d\n", uthread_self());
-	return 0;
+uthread_t tid[2];
+
+int thread2(void *arg) {
+    int ret;
+    printf("thread2\n");
+    uthread_join(tid[0], &ret);
+    printf("thread1 returned %d\n", ret);
+    return 2;
 }
 
-int thread2(void* arg)
-{
-	uthread_create(thread3, NULL);
-	uthread_yield();
-	printf("thread%d\n", uthread_self());
-	return 0;
+int thread1(void *arg) {
+    tid[1] = uthread_create(thread2, NULL);
+    printf("thread1\n");
+    return 1;
 }
 
-int thread1(void* arg)
-{
-	uthread_create(thread2, NULL);
-	uthread_yield();
-	printf("thread%d\n", uthread_self());
-	uthread_yield();
-	return 0;
+int main(void) {
+    int ret;
+    tid[0] = uthread_create(thread1, NULL);
+    uthread_yield();
+    uthread_join(tid[1], &ret);
+    printf("thread2 returned %d\n", ret);
+    return 0;
 }
 
-int main(void)
-{
-	uthread_join(uthread_create(thread1, NULL), NULL);
-	return 0;
-}

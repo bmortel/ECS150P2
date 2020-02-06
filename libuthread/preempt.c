@@ -21,7 +21,7 @@ struct itimerval timer;
 struct sigaction oldAction;
 
 // Force running thread to yield
-void signalHandler(int signum) { uthread_yield(); }
+void signalHandler() { uthread_yield(); }
 
 
 void preempt_disable(void) {
