@@ -23,7 +23,7 @@ static bool init = false;
 
 bool check_tid(void * tcb, uthread_t* tid2);
 
-bool check_waiting(void * tcb, uthread_t* blockedTID)
+bool check_waiting(void * tcb, uthread_t* blockedTID);
 
 void uthread_yield(void)
 {
