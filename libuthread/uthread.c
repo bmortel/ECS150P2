@@ -158,7 +158,7 @@ void uthread_init() {
     // Assign queues for different state
     readyQueue = queue_create();
     zombieQueue = queue_create();
-
+    blockedQueue = queue_create();
     // Create a thread for main
     struct Tcb* mainT = (struct Tcb*)malloc(sizeof(struct Tcb));
     mainT->tid = 0;
