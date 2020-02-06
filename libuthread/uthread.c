@@ -17,7 +17,6 @@
 static uthread_t TIDCount = 0;
 static queue_t readyQueue;
 static queue_t zombieQueue;
-static queue_t blockedQueue;
 static struct Tcb* currTcb;
 static bool init = false;
 
@@ -87,22 +86,27 @@ void uthread_exit(int retval)
     // Change current thread's state into zombie
     currTcb->curState = zombie;
     queue_enqueue(zombieQueue, currTcb);
+
     currTcb->retval = retval;
 
     void* tcb = malloc(sizeof(struct Tcb));
     struct Tcb* prev = currTcb;
 
-    // Deque the oldest thread in the ready queue and switch contexts to run next thread
+    // If the thread is joining another thread,
+    // Change the parent thread's state to ready and add it to ready queue
     if (currTcb->joined != NULL) {
         currTcb = currTcb->joined;
         currTcb->curState = ready;
         queue_enqueue(readyQueue, currTcb);
     }
+
+    // Deque the oldest thread in the ready queue and switch contexts to run next thread
     if (queue_dequeue(readyQueue, &tcb) != -1) {
         currTcb = (struct Tcb *) tcb;
         currTcb->curState = running;
         uthread_ctx_switch(&(prev->ctx), &(currTcb->ctx));
     }
+
     //preempt_enable();
 
 }
@@ -114,37 +118,35 @@ int uthread_join(uthread_t tid, int *retval)
     }
 
     void* tcb = malloc(sizeof(struct Tcb));
-    struct Tcb* prev = currTcb;
 
+    // Change the parent thread's state to blocked
     currTcb->curState = blocked;
-    queue_enqueue(blockedQueue, currTcb);
-
 
     // Look through ready queue
     queue_iterate(readyQueue, (queue_func_t) check_tid, (void *)&tid, &tcb);
     if (tcb == NULL) {
+        // If thread not found in ready queue, look through zombie queue
         queue_iterate(zombieQueue, (queue_func_t) check_tid, (void *)&tid, &tcb);
+
         if (tcb == NULL) {
             return -1;
         }
     }
+
     struct Tcb* joining = (struct Tcb*) tcb;
+
+    // Delete child thread from zombie queue if it is in zombie queue
+    queue_delete(zombieQueue, joining);
     joining->joined = currTcb;
 
 
-    // If child is not found then it doesn't exist or is blocked
-
-    // Yield until there are no more threads ready to run
+    // Yield until child thread is ran
     while(joining->curState != zombie) {
         uthread_yield();
     }
 
+    // Assign return value of child
     *retval = joining->retval;
-    queue_delete(zombieQueue, joining);
-    queue_delete(blockedQueue, prev);
-    currTcb = prev;
-    free(joining);
-    uthread_yield();
 
     return 0;
 
