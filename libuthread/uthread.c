@@ -96,6 +96,7 @@ void uthread_exit(int retval)
     struct Tcb* prev = currTcb;
 
     // If the thread is joining another thread,
+    // Find the parent thread in blocked queue and
     // Change the parent thread's state to ready and add it to ready queue
     if (currTcb->joining) {
         queue_iterate(blockedQueue, (queue_func_t) check_waiting, (void *)&currTcb->tid, &tcb);
@@ -127,8 +128,9 @@ int uthread_join(uthread_t tid, int *retval)
     // Change the parent thread's state to blocked
     currTcb->curState = blocked;
 
-    // Look through ready queue
+    // Look through ready queue for child
     queue_iterate(readyQueue, (queue_func_t) check_tid, (void *)&tid, &tcb);
+    // Look through zombie queue for child
     queue_iterate(zombieQueue, (queue_func_t) check_tid, (void *)&tid, &tcb);
 
 
@@ -139,6 +141,8 @@ int uthread_join(uthread_t tid, int *retval)
     queue_delete(zombieQueue, joining);
     joining->joining = true;
     currTcb->waiting = joining->tid;
+
+    // Queue the parent thread in blocked queue
     queue_enqueue(blockedQueue, currTcb);
 
 
@@ -178,7 +182,7 @@ bool check_tid(void * tcb, uthread_t* tid2) {
     return false;
 }
 
-
+// Check if tid in blocked queue matches the child thread's tid
 bool check_waiting(void * tcb, uthread_t* blockedTID) {
     if (((struct Tcb*)tcb)->waiting == *blockedTID) {
         return true;
