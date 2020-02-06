@@ -21,9 +21,14 @@ static queue_t blockedQueue;
 static struct Tcb* currTcb;
 static bool init = false;
 
+// Check if tid matched a thread in queue
 bool check_tid(void * tcb, uthread_t* tid2);
 
+// Check if tid in blocked queue matches the child thread's tid
 bool check_waiting(void * tcb, uthread_t* blockedTID);
+
+// Free claimed thread
+void free_claimed(struct Tcb** claimed)
 
 void uthread_yield(void)
 {
@@ -176,6 +181,7 @@ int uthread_join(uthread_t tid, int *retval)
     if (retval != NULL) {
         *retval = join->retval;
     }
+    free_claimed(&join);
 
     return 0;
 
@@ -205,7 +211,6 @@ bool check_tid(void * tcb, uthread_t* tid2) {
     return false;
 }
 
-// Check if tid in blocked queue matches the child thread's tid
 bool check_waiting(void * tcb, uthread_t* blockedTID) {
     if (((struct Tcb*)tcb)->waiting == *blockedTID) {
         return true;
@@ -213,5 +218,9 @@ bool check_waiting(void * tcb, uthread_t* blockedTID) {
     return false;
 }
 
+void free_claimed(struct Tcb** claimed) {
+    uthread_ctx_destroy_stack((*claimed)->stack);
+    free(*claimed);
+}
 
 
