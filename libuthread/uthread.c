@@ -21,7 +21,7 @@ static queue_t blockedQueue;
 static struct Tcb* currTcb;
 static bool init = false;
 
-bool check_tid(void * tcb, uthread_t tid2);
+bool check_tid(void * tcb, uthread_t* tid2);
 
 void uthread_yield(void)
 {
@@ -93,11 +93,7 @@ void uthread_exit(int retval)
     struct Tcb* prev = currTcb;
 
     // Deque the oldest thread in the ready queue and switch contexts to run next thread
-    if (currTcb->joined != NULL) {
-        currTcb = currTcb->joined;
-        uthread_ctx_switch(&(prev->ctx), &(currTcb->ctx));
-    }
-    else if (queue_dequeue(readyQueue, &tcb) != -1) {
+    if (queue_dequeue(readyQueue, &tcb) != -1) {
         currTcb = (struct Tcb *) tcb;
         currTcb->curState = running;
         uthread_ctx_switch(&(prev->ctx), &(currTcb->ctx));
@@ -114,13 +110,14 @@ int uthread_join(uthread_t tid, int *retval)
     }
 
     void* tcb = malloc(sizeof(struct Tcb));
-
+    struct tcb* prev = currTcb;
 
     currTcb->curState = blocked;
     queue_enqueue(blockedQueue, currTcb);
 
+
     // Look through ready queue
-    queue_iterate(readyQueue, (queue_func_t) check_tid, (void *)&tid, tcb);
+    queue_iterate(readyQueue, (queue_func_t) check_tid, (void *)tid, &tcb);
     if (tcb == NULL) {
         return -1;
     }
@@ -144,6 +141,7 @@ int uthread_join(uthread_t tid, int *retval)
     *retval = joining->retval;
     queue_delete(zombieQueue, joining);
     queue_delete(blockedQueue, prev);
+    currTcb = prev;
     currTcb->curState = ready;
     free(joining);
     uthread_yield();
@@ -170,8 +168,8 @@ void uthread_init() {
 }
 
 
-bool check_tid(void * tcb, uthread_t tid2) {
-    if (((struct Tcb*)tcb)->tid == tid2) {
+bool check_tid(void * tcb, uthread_t* tid2) {
+    if (((struct Tcb*)tcb)->tid == *tid2) {
         return true;
     }
     return false;
