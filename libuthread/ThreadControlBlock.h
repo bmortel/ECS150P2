@@ -13,7 +13,8 @@ struct Tcb {
     void* stack;
     enum state curState;
     int retval;
-    struct Tcb* joined;
+    bool joining;
+    uthread_t waiting;
 };
 
 

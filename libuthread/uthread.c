@@ -23,6 +23,8 @@ static bool init = false;
 
 bool check_tid(void * tcb, uthread_t* tid2);
 
+bool check_waiting(void * tcb, uthread_t* blockedTID)
+
 void uthread_yield(void)
 {
     //preempt_disable();
@@ -72,10 +74,10 @@ int uthread_create(uthread_func_t func, void *arg)
     TIDCount++;
     tb->tid = TIDCount;
 
-    tb->joined = NULL;
-
     // Change the state of the newly created thread to ready
     tb->curState = ready;
+    tb->joining = false;
+
     queue_enqueue(readyQueue, tb);
     preempt_enable();
     return TIDCount;
@@ -94,11 +96,14 @@ void uthread_exit(int retval)
     struct Tcb* prev = currTcb;
 
     // If the thread is joining another thread,
+    // Find the parent thread in blocked queue and
     // Change the parent thread's state to ready and add it to ready queue
-    if (currTcb->joined != NULL) {
-        currTcb = currTcb->joined;
+    if (currTcb->joining) {
+        queue_iterate(blockedQueue, (queue_func_t) check_waiting, (void *)&currTcb->tid, &tcb);
+        currTcb = (struct Tcb *) tcb;
         currTcb->curState = ready;
         queue_enqueue(readyQueue, currTcb);
+        queue_delete(blockedQueue,currTcb);
     }
 
     // Deque the oldest thread in the ready queue and switch contexts to run next thread
@@ -123,23 +128,23 @@ int uthread_join(uthread_t tid, int *retval)
     // Change the parent thread's state to blocked
     currTcb->curState = blocked;
 
-    // Look through ready queue
+    // Look through ready queue for child
     queue_iterate(readyQueue, (queue_func_t) check_tid, (void *)&tid, &tcb);
-    if (tcb == NULL) {
-        // If thread not found in ready queue, look through zombie queue
-        queue_iterate(zombieQueue, (queue_func_t) check_tid, (void *)&tid, &tcb);
+    // Look through zombie queue for child
+    queue_iterate(zombieQueue, (queue_func_t) check_tid, (void *)&tid, &tcb);
 
-        if (tcb == NULL) {
-            return -1;
-        }
-    }
+
 
     struct Tcb* joining = (struct Tcb*) tcb;
 
     // Delete child thread from zombie queue if it is in zombie queue
     preempt_disable();
     queue_delete(zombieQueue, joining);
-    joining->joined = currTcb;
+    joining->joining = true;
+    currTcb->waiting = joining->tid;
+
+    // Queue the parent thread in blocked queue
+    queue_enqueue(blockedQueue, currTcb);
     preempt_enable();
 
     // Yield until child thread is ran
@@ -159,7 +164,6 @@ void uthread_init() {
     readyQueue = queue_create();
     zombieQueue = queue_create();
     blockedQueue = queue_create();
-
     // Create a thread for main
     struct Tcb* mainT = (struct Tcb*)malloc(sizeof(struct Tcb));
     mainT->tid = 0;
@@ -179,6 +183,13 @@ bool check_tid(void * tcb, uthread_t* tid2) {
     return false;
 }
 
+// Check if tid in blocked queue matches the child thread's tid
+bool check_waiting(void * tcb, uthread_t* blockedTID) {
+    if (((struct Tcb*)tcb)->waiting == *blockedTID) {
+        return true;
+    }
+    return false;
+}
 
 
 
