@@ -139,7 +139,7 @@ int uthread_join(uthread_t tid, int *retval)
 
     // Delete child thread from zombie queue if it is in zombie queue
     preempt_disable();
-    queue_delete(zombieQueue, joining);
+    queue_delete(zombieQueue, join);
     join->joining = true;
     currTcb->waiting = join->tid;
 
