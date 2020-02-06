@@ -16,8 +16,9 @@
  */
 #define HZ 100
 
-struct sigaction sigStruct;
+struct sigaction sigActionStruct;
 struct itimerval timer;
+struct sigaction oldAction;
 
 // Force running thread to yield
 void signalHandler(int signum) { uthread_yield(); }
@@ -25,37 +26,31 @@ void signalHandler(int signum) { uthread_yield(); }
 
 void preempt_disable(void) {
 
-  // Remove SIGVTALRM from mask
-  if (sigdelset(&sigStruct.sa_mask, SIGVTALRM)) {
-
-    perror("sigdelset error");
+  // Restore default SIGVTALRM action
+  if (sigaction(SIGVTALRM, &oldAction, NULL) == -1) {
+    perror("sigaction error");
     exit(EXIT_FAILURE);
   }
 }
 
 void preempt_enable(void) {
 
-  // Add SIGVTALRM back to mask
-  if (sigaddset(&sigStruct.sa_mask, SIGVTALRM)) {
-
-    perror("sigaddset error");
+  // Restore our SIGVTALRM handler
+  if (sigaction(SIGVTALRM, &sigActionStruct, NULL) == -1) {
+    perror("sigaction error");
     exit(EXIT_FAILURE);
   }
 }
 
 void preempt_start(void) {
 
-	// Set mask to empty set then add SIGVTALRM to mask
-  sigemptyset(&sigStruct.sa_mask);
-  if (sigaddset(&sigStruct.sa_mask, SIGVTALRM)) {
-    perror("sigaddset error");
-    exit(EXIT_FAILURE);
-  }
+	// Set mask to empty set 
+  sigemptyset(&sigActionStruct.sa_mask);
 
 	// Install signal handler
-  sigStruct.sa_flags = 0;
-  sigStruct.sa_handler = signalHandler;
-  if (sigaction(SIGVTALRM, &sigStruct, NULL) == -1) {
+  sigActionStruct.sa_flags = 0;
+  sigActionStruct.sa_handler = signalHandler;
+  if (sigaction(SIGVTALRM, &sigActionStruct, &oldAction) == -1) {
     perror("sigaction error");
     exit(EXIT_FAILURE);
   }
