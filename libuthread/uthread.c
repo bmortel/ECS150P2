@@ -17,6 +17,7 @@
 static uthread_t TIDCount = 0;
 static queue_t readyQueue;
 static queue_t zombieQueue;
+static queue_t blockedQueue;
 static struct Tcb* currTcb;
 static bool init = false;
 
@@ -75,6 +76,8 @@ int uthread_create(uthread_func_t func, void *arg)
 
     // Change the state of the newly created thread to ready
     tb->curState = ready;
+    tb->joining = false;
+
     queue_enqueue(readyQueue, tb);
     //preempt_enable();
     return TIDCount;
@@ -94,10 +97,12 @@ void uthread_exit(int retval)
 
     // If the thread is joining another thread,
     // Change the parent thread's state to ready and add it to ready queue
-    if (currTcb->joined != NULL) {
-        currTcb = currTcb->joined;
+    if (currTcb->joining) {
+        queue_iterate(blockedQueue, (queue_func_t) check_waiting, (void *)&currTcb->tid, &tcb);
+        currTcb = (struct Tcb *) tcb;
         currTcb->curState = ready;
         queue_enqueue(readyQueue, currTcb);
+        queue_delete(blockedQueue,currTcb);
     }
 
     // Deque the oldest thread in the ready queue and switch contexts to run next thread
@@ -124,20 +129,17 @@ int uthread_join(uthread_t tid, int *retval)
 
     // Look through ready queue
     queue_iterate(readyQueue, (queue_func_t) check_tid, (void *)&tid, &tcb);
-    if (tcb == NULL) {
-        // If thread not found in ready queue, look through zombie queue
-        queue_iterate(zombieQueue, (queue_func_t) check_tid, (void *)&tid, &tcb);
+    queue_iterate(zombieQueue, (queue_func_t) check_tid, (void *)&tid, &tcb);
 
-        if (tcb == NULL) {
-            return -1;
-        }
-    }
+
 
     struct Tcb* joining = (struct Tcb*) tcb;
 
     // Delete child thread from zombie queue if it is in zombie queue
     queue_delete(zombieQueue, joining);
-    joining->joined = currTcb;
+    joining->joining = true;
+    currTcb->waiting = joining->tid;
+    queue_enqueue(blockedQueue, currTcb);
 
 
     // Yield until child thread is ran
@@ -176,6 +178,13 @@ bool check_tid(void * tcb, uthread_t* tid2) {
     return false;
 }
 
+
+bool check_waiting(void * tcb, uthread_t* blockedTID) {
+    if (((struct Tcb*)tcb)->waiting == *blockedTID) {
+        return true;
+    }
+    return false;
+}
 
 
 
