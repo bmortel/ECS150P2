@@ -36,7 +36,7 @@ CUR_PWD := $(shell pwd)
 CC	= gcc
 
 # General gcc options
-CFLAGS	:= -Wall -Werror
+CFLAGS	:= -Wall -Werror -Wno-deprecated-declarations
 CFLAGS	+= -pipe
 ## Debug flag
 ifneq ($(D),1)
