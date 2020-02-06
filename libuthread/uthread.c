@@ -114,27 +114,24 @@ int uthread_join(uthread_t tid, int *retval)
     }
 
     void* tcb = malloc(sizeof(struct Tcb));
-    struct tcb* prev = currTcb;
+    struct Tcb* prev = currTcb;
 
     currTcb->curState = blocked;
     queue_enqueue(blockedQueue, currTcb);
 
 
     // Look through ready queue
-    queue_iterate(readyQueue, (queue_func_t) check_tid, (void *)tid, &tcb);
+    queue_iterate(readyQueue, (queue_func_t) check_tid, (void *)&tid, &tcb);
     if (tcb == NULL) {
-        return -1;
+        queue_iterate(zombieQueue, (queue_func_t) check_tid, (void *)&tid, &tcb);
+        if (tcb == NULL) {
+            return -1;
+        }
     }
     struct Tcb* joining = (struct Tcb*) tcb;
     joining->joined = currTcb;
 
 
-    // Look through zombie queue
-    /*tcb = malloc(sizeof(struct Tcb));
-    queue_iterate(zombieQueue, (queue_func_t) check_tid, (void *)&tid, tcb);
-    if (tcb == NULL) {
-        return -1;
-    }*/
     // If child is not found then it doesn't exist or is blocked
 
     // Yield until there are no more threads ready to run

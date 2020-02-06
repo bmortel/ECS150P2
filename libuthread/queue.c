@@ -127,10 +127,11 @@ int queue_iterate(queue_t queue, queue_func_t func, void *arg, void **data)
             if (data != NULL){
             *data = curr->item;
             }
-            break;
+            return 0;
         }
         curr = curr->next;
     }
+    *data = NULL;
 
     return 0;
 }
