@@ -135,25 +135,27 @@ int uthread_join(uthread_t tid, int *retval)
 
 
 
-    struct Tcb* joining = (struct Tcb*) tcb;
+    struct Tcb* join = (struct Tcb*) tcb;
 
     // Delete child thread from zombie queue if it is in zombie queue
     preempt_disable();
     queue_delete(zombieQueue, joining);
-    joining->joining = true;
-    currTcb->waiting = joining->tid;
+    join->joining = true;
+    currTcb->waiting = join->tid;
 
     // Queue the parent thread in blocked queue
     queue_enqueue(blockedQueue, currTcb);
     preempt_enable();
 
     // Yield until child thread is ran
-    while(joining->curState != zombie) {
+    while(join->curState != zombie) {
         uthread_yield();
     }
 
     // Assign return value of child
-    *retval = joining->retval;
+    if (retval != NULL) {
+        *retval = join->retval;
+    }
 
     return 0;
 
