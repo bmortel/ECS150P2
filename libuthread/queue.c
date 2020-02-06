@@ -132,7 +132,6 @@ int queue_iterate(queue_t queue, queue_func_t func, void *arg, void **data)
         curr = curr->next;
     }
 
-
     return 0;
 }
 

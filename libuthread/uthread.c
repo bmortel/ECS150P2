@@ -23,7 +23,7 @@ static bool init = false;
 
 bool check_tid(void * tcb, uthread_t* tid2);
 
-bool check_waiting(void * tcb, uthread_t* blockedTID)
+bool check_waiting(void * tcb, uthread_t* blockedTID);
 
 void uthread_yield(void)
 {
@@ -70,7 +70,7 @@ int uthread_create(uthread_func_t func, void *arg)
     }
 
     // Increment the tid and assign the tid to the newly created thread
-    //preempt_disable();
+    preempt_disable();
     TIDCount++;
     tb->tid = TIDCount;
 
@@ -79,13 +79,13 @@ int uthread_create(uthread_func_t func, void *arg)
     tb->joining = false;
 
     queue_enqueue(readyQueue, tb);
-    //preempt_enable();
+    preempt_enable();
     return TIDCount;
 }
 
 void uthread_exit(int retval)
 {   
-    //preempt_disable();
+    preempt_disable();
     // Change current thread's state into zombie
     currTcb->curState = zombie;
     queue_enqueue(zombieQueue, currTcb);
@@ -113,7 +113,7 @@ void uthread_exit(int retval)
         uthread_ctx_switch(&(prev->ctx), &(currTcb->ctx));
     }
 
-    //preempt_enable();
+    preempt_enable();
 
 }
 
@@ -138,13 +138,14 @@ int uthread_join(uthread_t tid, int *retval)
     struct Tcb* joining = (struct Tcb*) tcb;
 
     // Delete child thread from zombie queue if it is in zombie queue
+    preempt_disable();
     queue_delete(zombieQueue, joining);
     joining->joining = true;
     currTcb->waiting = joining->tid;
 
     // Queue the parent thread in blocked queue
     queue_enqueue(blockedQueue, currTcb);
-
+    preempt_enable();
 
     // Yield until child thread is ran
     while(joining->curState != zombie) {
@@ -171,7 +172,7 @@ void uthread_init() {
     // Set the current thread to main
     currTcb = mainT;
     init = true;
-    //preempt_start();
+    preempt_start();
 }
 
 

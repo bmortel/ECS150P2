@@ -6,7 +6,9 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/time.h>
+#include <unistd.h>
 
 #include "uthread.h"
 
@@ -16,53 +18,45 @@
  */
 #define HZ 100
 
-struct sigaction sigStruct;
+struct sigaction sigActionStruct;
 struct itimerval timer;
+struct sigaction oldAction;
 
 // Force running thread to yield
 void signalHandler() { uthread_yield(); }
 
-
 void preempt_disable(void) {
-
-  // Remove SIGVTALRM from mask
-  if (sigdelset(&sigStruct.sa_mask, SIGVTALRM)) {
-
-    perror("sigdelset error");
+  // Restore default SIGVTALRM action
+  if (sigaction(SIGVTALRM, &oldAction, NULL) == -1) {
+    perror("sigaction error");
     exit(EXIT_FAILURE);
   }
 }
 
 void preempt_enable(void) {
-
-  // Add SIGVTALRM back to mask
-  if (sigaddset(&sigStruct.sa_mask, SIGVTALRM)) {
-
-    perror("sigaddset error");
+  // Restore our SIGVTALRM handler
+  if (sigaction(SIGVTALRM, &sigActionStruct, NULL) == -1) {
+    perror("sigaction error");
     exit(EXIT_FAILURE);
   }
 }
 
 void preempt_start(void) {
-
-	// Set mask to empty set then add SIGVTALRM to mask
-  sigemptyset(&sigStruct.sa_mask);
-  if (sigaddset(&sigStruct.sa_mask, SIGVTALRM)) {
-    perror("sigaddset error");
-    exit(EXIT_FAILURE);
-  }
-
-	// Install signal handler
-  sigStruct.sa_flags = 0;
-  sigStruct.sa_handler = signalHandler;
-  if (sigaction(SIGVTALRM, &sigStruct, NULL) == -1) {
+  // Set mask to empty set
+  sigemptyset(&sigActionStruct.sa_mask);
+  // Install signal handler
+  sigActionStruct.sa_flags = 0;
+  sigActionStruct.sa_handler = signalHandler;
+  if (sigaction(SIGVTALRM, &sigActionStruct, &oldAction) == -1) {
     perror("sigaction error");
     exit(EXIT_FAILURE);
   }
 
   // Set alarm initial tick and interval
-  timer.it_value.tv_sec = 1 / HZ;
-  timer.it_interval = timer.it_value;
+  timer.it_value.tv_sec = 0;
+  timer.it_interval.tv_sec = 0;
+  timer.it_interval.tv_usec = 10000;
+  timer.it_value.tv_usec = 10000;
 
   // Initialize timer
   if (setitimer(ITIMER_VIRTUAL, &timer, NULL) == -1) {
