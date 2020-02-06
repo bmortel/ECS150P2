@@ -3,7 +3,8 @@
 programs := \
 	test_queue.x \
 	uthread_hello.x \
-	uthread_yield.x
+	uthread_yield.x \
+	test_preempt.x
 
 ## *** IMPORTANT *** ##
 ##	You should NOT have to modify anything below

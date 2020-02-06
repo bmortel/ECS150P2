@@ -6,7 +6,9 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/time.h>
+#include <unistd.h>
 
 #include "uthread.h"
 
@@ -23,9 +25,7 @@ struct sigaction oldAction;
 // Force running thread to yield
 void signalHandler() { uthread_yield(); }
 
-
 void preempt_disable(void) {
-
   // Restore default SIGVTALRM action
   if (sigaction(SIGVTALRM, &oldAction, NULL) == -1) {
     perror("sigaction error");
@@ -34,7 +34,6 @@ void preempt_disable(void) {
 }
 
 void preempt_enable(void) {
-
   // Restore our SIGVTALRM handler
   if (sigaction(SIGVTALRM, &sigActionStruct, NULL) == -1) {
     perror("sigaction error");
@@ -43,11 +42,9 @@ void preempt_enable(void) {
 }
 
 void preempt_start(void) {
-
-	// Set mask to empty set 
+  // Set mask to empty set
   sigemptyset(&sigActionStruct.sa_mask);
-
-	// Install signal handler
+  // Install signal handler
   sigActionStruct.sa_flags = 0;
   sigActionStruct.sa_handler = signalHandler;
   if (sigaction(SIGVTALRM, &sigActionStruct, &oldAction) == -1) {
@@ -56,8 +53,10 @@ void preempt_start(void) {
   }
 
   // Set alarm initial tick and interval
-  timer.it_value.tv_sec = 1 / HZ;
-  timer.it_interval = timer.it_value;
+  timer.it_value.tv_sec = 0;
+  timer.it_interval.tv_sec = 0;
+  timer.it_interval.tv_usec = 10000;
+  timer.it_value.tv_usec = 10000;
 
   // Initialize timer
   if (setitimer(ITIMER_VIRTUAL, &timer, NULL) == -1) {

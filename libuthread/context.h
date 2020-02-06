@@ -1,6 +1,6 @@
 #ifndef _CONTEXT_H
 #define _CONTEXT_H
-
+#define _XOPEN_SOURCE 600
 #include <ucontext.h>
 
 #include "uthread.h"
