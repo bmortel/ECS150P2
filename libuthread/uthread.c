@@ -198,6 +198,20 @@ void uthread_init() {
 }
 
 
+bool check_tid(void * tcb, uthread_t* tid2) {
+    if (((struct Tcb*)tcb)->tid == *tid2) {
+        return true;
+    }
+    return false;
+}
+
+// Check if tid in blocked queue matches the child thread's tid
+bool check_waiting(void * tcb, uthread_t* blockedTID) {
+    if (((struct Tcb*)tcb)->waiting == *blockedTID) {
+        return true;
+    }
+    return false;
+}
 
 
 
