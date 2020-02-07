@@ -3,8 +3,8 @@
 The queue is implemented by using a linked list. A header file LinkedList.h 
 defines the linked list structure. 
 
-The linked list is comprised of `ListNode` structs that contain a `void` 
-`item` to hold data and `ListNode next` to point to the next node. 
+The linked list is comprised of `ListNode` structs that contain a `void*` 
+`item` to hold data and `ListNode* next` to point to the next node. 
 
 The queue struct contains two `ListNode` pointers `head` and `curr` to 
 keep track of the beginning and end of the list and an `int length` to 
