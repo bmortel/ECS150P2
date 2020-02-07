@@ -103,7 +103,8 @@ in `oldAction`.
 
 The alarm is implemented by setting `timer`'s `it_value.tv_sec` and 
 `it_interval.tv_sec` members to 0 and setting `it_interval.tv_usec` and 
-`it_value.tv_usec` to 10000. Then `setitimer(ITIMER_VIRTUAL, &timer, NULL
+`it_value.tv_usec` to 10000. 10000 usec will result in 100HZ. Then 
+`setitimer(ITIMER_VIRTUAL, &timer, NULL)
 ` is called to set a virtual timer using the `timer` struct values.
 ### preempt enabling/disabling
 `preempt_enable()` and `preempt_disable()` both use `sigaction()` to 
