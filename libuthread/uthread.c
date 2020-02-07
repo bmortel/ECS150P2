@@ -32,7 +32,7 @@ void free_claimed(struct Tcb** claimed)
 
 void uthread_yield(void)
 {
-    //preempt_disable();
+    preempt_disable();
     void* tcb = malloc(sizeof(struct Tcb));
 
     struct Tcb* prev = currTcb;
@@ -49,7 +49,7 @@ void uthread_yield(void)
         currTcb->curState = running;
         uthread_ctx_switch(&(prev->ctx), &(currTcb->ctx));
     }
-    //preempt_enable();
+    preempt_enable();
 }
 
 uthread_t uthread_self(void)
@@ -139,7 +139,7 @@ void uthread_exit(int retval)
 
 int uthread_join(uthread_t tid, int *retval)
 {
-    if (tid == currTcb->tid || tid == 0) {
+    if (tid == currTcb->tid || tid <= 0) {
         return -1;
     }
 
