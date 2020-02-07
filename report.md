@@ -48,7 +48,8 @@ currTcb` is used to store the currently running thread.
 The library also has helped functions such as `check_tid` which searched for a 
 given thread with the matching given TID, `check_waiting` which searches for 
 the parent TID stored in the thread in a given queue, and `free_claimed` which 
-frees the memory of a thread after it has been collected. ### uthread_create 
+frees the memory of a thread after it has been collected. 
+### uthread_create 
 The join function first checks if the main thread has been initialized. 
 Afterwards, it creates a new `Tcb` variable and allocates memory for the stack. 
 The TID is incremented and assigned to the newly created thread. The current 
