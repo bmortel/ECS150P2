@@ -19,6 +19,9 @@ struct queue {
 queue_t queue_create(void)
 {
 	queue_t myQueue = (queue_t) malloc(sizeof(struct queue));
+	if (myQueue == NULL) {
+	    return NULL;
+	}
     myQueue->head = NULL;
     myQueue->curr = myQueue->head;
 	myQueue->length = 0;
@@ -32,7 +35,7 @@ int queue_destroy(queue_t queue)
     }
     free(queue->head);
     free(queue);
-    
+
     return 0;
 }
 
@@ -42,6 +45,11 @@ int queue_enqueue(queue_t queue, void *data)
         return -1;
     }
     struct ListNode* nextN = (struct ListNode *) malloc(sizeof(struct ListNode));
+
+    if (nextN == NULL) {
+        return -1;
+    }
+
     nextN->next = NULL;
     nextN->item = data;
 
@@ -143,5 +151,6 @@ int queue_length(queue_t queue)
 	return queue->length;
     
 }
+
 
 

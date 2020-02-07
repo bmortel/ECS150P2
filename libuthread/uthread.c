@@ -21,14 +21,20 @@ static queue_t blockedQueue;
 static struct Tcb* currTcb;
 static bool init = false;
 
+// Check if tid matched a thread in queue
 bool check_tid(void * tcb, uthread_t* tid2);
 
+// Check if tid in blocked queue matches the child thread's tid
 bool check_waiting(void * tcb, uthread_t* blockedTID);
+
+// Free claimed thread
+void free_claimed(struct Tcb** claimed)
 
 void uthread_yield(void)
 {
-    //preempt_disable();
+    preempt_disable();
     void* tcb = malloc(sizeof(struct Tcb));
+
     struct Tcb* prev = currTcb;
 
     // Add current thread to queue so it can resume later
@@ -43,7 +49,7 @@ void uthread_yield(void)
         currTcb->curState = running;
         uthread_ctx_switch(&(prev->ctx), &(currTcb->ctx));
     }
-    //preempt_enable();
+    preempt_enable();
 }
 
 uthread_t uthread_self(void)
@@ -61,8 +67,18 @@ int uthread_create(uthread_func_t func, void *arg)
 
     struct Tcb* tb = malloc(sizeof(struct Tcb));
 
+    // Check if memory has been properly allocated
+    if (tb == NULL) {
+        return -1;
+    }
+
     // Allocate memory for stack
     tb->stack = uthread_ctx_alloc_stack();
+
+    // Check if stack has been properly allocated
+    if (tb->stack == NULL) {
+        return -1;
+    }
 
     // Initialize the context and check if there is an error
     if (uthread_ctx_init(&tb->ctx, tb->stack, func, arg) == -1) {
@@ -78,7 +94,11 @@ int uthread_create(uthread_func_t func, void *arg)
     tb->curState = ready;
     tb->joining = false;
 
-    queue_enqueue(readyQueue, tb);
+    // Check if data is properly enqueued to queue
+    if (queue_enqueue(readyQueue, tb) == -1) {
+        return -1;
+    }
+
     preempt_enable();
     return TIDCount;
 }
@@ -119,11 +139,11 @@ void uthread_exit(int retval)
 
 int uthread_join(uthread_t tid, int *retval)
 {
-    if (tid == currTcb->tid || tid == 0) {
+    if (tid == currTcb->tid || tid <= 0) {
         return -1;
     }
 
-    void* tcb = malloc(sizeof(struct Tcb));
+    void* tcb;
 
     // Change the parent thread's state to blocked
     currTcb->curState = blocked;
@@ -132,6 +152,11 @@ int uthread_join(uthread_t tid, int *retval)
     queue_iterate(readyQueue, (queue_func_t) check_tid, (void *)&tid, &tcb);
     // Look through zombie queue for child
     queue_iterate(zombieQueue, (queue_func_t) check_tid, (void *)&tid, &tcb);
+
+    // Return if tid doesn't exist in either queue
+    if (tcb == NULL) {
+        return -1;
+    }
 
 
 
@@ -156,6 +181,7 @@ int uthread_join(uthread_t tid, int *retval)
     if (retval != NULL) {
         *retval = join->retval;
     }
+    free_claimed(&join);
 
     return 0;
 
@@ -185,7 +211,6 @@ bool check_tid(void * tcb, uthread_t* tid2) {
     return false;
 }
 
-// Check if tid in blocked queue matches the child thread's tid
 bool check_waiting(void * tcb, uthread_t* blockedTID) {
     if (((struct Tcb*)tcb)->waiting == *blockedTID) {
         return true;
@@ -193,5 +218,9 @@ bool check_waiting(void * tcb, uthread_t* blockedTID) {
     return false;
 }
 
+void free_claimed(struct Tcb** claimed) {
+    uthread_ctx_destroy_stack((*claimed)->stack);
+    free(*claimed);
+}
 
 

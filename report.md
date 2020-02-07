@@ -5,8 +5,8 @@
 The queue is implemented by using a linked list. A header file LinkedList.h 
 defines the linked list structure. 
 
-The linked list is comprised of `ListNode` structs that contain a `void` 
-`item` to hold data and `ListNode next` to point to the next node. 
+The linked list is comprised of `ListNode` structs that contain a `void*` 
+`item` to hold data and `ListNode* next` to point to the next node. 
 
 The queue struct contains two `ListNode` pointers `head` and `curr` to 
 keep track of the beginning and end of the list and an `int length` to 
@@ -50,7 +50,8 @@ currTcb` is used to store the currently running thread.
 The library also has helped functions such as `check_tid` which searched for a 
 given thread with the matching given TID, `check_waiting` which searches for 
 the parent TID stored in the thread in a given queue, and `free_claimed` which 
-frees the memory of a thread after it has been collected. ### uthread_create 
+frees the memory of a thread after it has been collected. 
+### uthread_create 
 The join function first checks if the main thread has been initialized. 
 Afterwards, it creates a new `Tcb` variable and allocates memory for the stack. 
 The TID is incremented and assigned to the newly created thread. The current 
@@ -105,12 +106,13 @@ in `oldAction`.
 
 The alarm is implemented by setting `timer`'s `it_value.tv_sec` and 
 `it_interval.tv_sec` members to 0 and setting `it_interval.tv_usec` and 
-`it_value.tv_usec` to 10000. Then `setitimer(ITIMER_VIRTUAL, &timer, NULL
+`it_value.tv_usec` to 10000. 10000 usec will result in 100HZ. Then 
+`setitimer(ITIMER_VIRTUAL, &timer, NULL)
 ` is called to set a virtual timer using the `timer` struct values.
 ### preempt enabling/disabling
 `preempt_enable()` and `preempt_disable()` both use `sigaction()` to 
-install 
-the new signal handler and original signal handler respectively.
+install the new signal handler and restore the original signal 
+handler respectively.
 
 `sigaction()` is used because it is multithread safe and asynchronous safe.
 ### testing preemption
