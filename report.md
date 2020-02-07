@@ -1,3 +1,4 @@
+# Project #2 - User-level thread library
 ## Queue API
 
 The queue is implemented by using a linked list. A header file LinkedList.h 
@@ -29,13 +30,13 @@ To implement our uthread library, we took advantage of the
 queue API we have developed earlier. In order to store information about 
 individual threads, we created a data structure called `Tcb` or Thread Control 
 Block. Each thread had a corresponding `Tcb` and held the following data: 
- The TID of the thread 
- The context of the thread 
- Pointer to the head of the stack 
- The state the thread is currently in 
- The return value of the thread
- A boolean to check if the thread is joining 
- The TID of the parent thread if the thread is joining 
+* The TID of the thread 
+* The context of the thread 
+* Pointer to the head of the stack 
+* The state the thread is currently in 
+* The return value of the thread
+* A boolean to check if the thread is joining 
+* The TID of the parent thread if the thread is joining 
 
 In order to store the `Tcb` of each thread, we had three queues in our library 
 for the ready threads, the zombie threads, and the blocked threads. The library 
@@ -77,6 +78,10 @@ thread and joining a parent thread, it iterates through the blocked queue to
 find the parent thread. The parent thread is enqueued to the ready queue and 
 deleted from the blocked queue. Then, the function dequeues the next ready 
 thread and performs a context switch. 
+### testing
+To test our uthread library, we used the provided `utest_hello.c` and
+`utest_yield.c` programs provided. Then we modified the programs to 
+test other specifications and cover more cases.
 
 -----
 ## Preemption
@@ -124,3 +129,9 @@ printed in the terminal.
 This program demonstrates preemption because one can observe the variables 
 taking turns being incremented. Without preemption each thread would run until 
 it is done incrementing before allowing the next one to run.
+
+# Sources 
+ECS 150 Slides   
+[Stack Overflow](https://stackoverflow.com/)  
+[Geeks for Geeks](https://www.geeksforgeeks.org/)  
+[Linux man pages](https://linux.die.net/man/)
