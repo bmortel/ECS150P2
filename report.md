@@ -1,5 +1,3 @@
-# Project 2: User-level thread library
-
 ## Queue API
 
 The queue is implemented by using a linked list. A header file LinkedList.h 
