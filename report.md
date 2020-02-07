@@ -109,8 +109,8 @@ The alarm is implemented by setting `timer`'s `it_value.tv_sec` and
 ` is called to set a virtual timer using the `timer` struct values.
 ### preempt enabling/disabling
 `preempt_enable()` and `preempt_disable()` both use `sigaction()` to 
-install 
-the new signal handler and original signal handler respectively.
+install the new signal handler and restore the original signal 
+handler respectively.
 
 `sigaction()` is used because it is multithread safe and asynchronous safe.
 ### testing preemption
